@@ -1,0 +1,40 @@
+﻿<!--
+	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<OutputType>Exe</OutputType>
+		<GenerateProgramFile>false</GenerateProgramFile>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<WarningLevel>4</WarningLevel>
+	</PropertyGroup>
+
+	<Import Project="..\common.props" />
+
+	<ItemGroup>
+		<None Update="appconfig.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup><!--<ProjectReference Include="..\WellEngineered.Solder.PrivateBuild.NMock\WellEngineered.Solder.PrivateBuild.NMock.csproj" />
+		<ProjectReference Include="..\WellEngineered.Solder.PrivateBuild.NUnit\WellEngineered.Solder.PrivateBuild.NUnit.csproj" />-->
+	
+	  <ProjectReference Include="..\WellEngineered.Siobhan.Middleware\WellEngineered.Siobhan.Middleware.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="nunit" Version="3.13.2" />
+		<PackageReference Include="NUnitLite" Version="3.13.2" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.2.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<DefineConstants>$(DefineConstants);LEAK_CHECK</DefineConstants>
+	</PropertyGroup>
+
+</Project>
