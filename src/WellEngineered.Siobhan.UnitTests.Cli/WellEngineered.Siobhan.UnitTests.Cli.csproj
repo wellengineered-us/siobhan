@@ -1,5 +1,5 @@
 ﻿<!--
-	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Copyright ©2020-2022 WellEngineered.us, all rights reserved.
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 -->
 <Project Sdk="Microsoft.NET.Sdk">
@@ -22,15 +22,15 @@
 
 	<ItemGroup><!--<ProjectReference Include="..\WellEngineered.Solder.PrivateBuild.NMock\WellEngineered.Solder.PrivateBuild.NMock.csproj" />
 		<ProjectReference Include="..\WellEngineered.Solder.PrivateBuild.NUnit\WellEngineered.Solder.PrivateBuild.NUnit.csproj" />-->
-	
-	  <ProjectReference Include="..\WellEngineered.Siobhan.Middleware\WellEngineered.Siobhan.Middleware.csproj" />
+
+		<ProjectReference Include="..\WellEngineered.Siobhan.Middleware\WellEngineered.Siobhan.Middleware.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="nunit" Version="3.13.2" />
 		<PackageReference Include="NUnitLite" Version="3.13.2" />
-		<PackageReference Include="NUnit3TestAdapter" Version="4.2.0" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
 	</ItemGroup>
 
 	<PropertyGroup>

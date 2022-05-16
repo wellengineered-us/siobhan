@@ -1,5 +1,5 @@
 /*
-	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Copyright ©2020-2022 WellEngineered.us, all rights reserved.
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
@@ -12,7 +12,11 @@ using WellEngineered.Solder.Primitives;
 namespace WellEngineered.Siobhan.Textual
 {
 	public abstract partial class TextualReader<TTextualFieldSpec, TTextualSpec>
+#if ASYNC_ALL_THE_WAY_DOWN
 		: DualLifecycle,
+#else
+		: Lifecycle,
+#endif
 			ITextualReader<TTextualFieldSpec, TTextualSpec>
 		where TTextualFieldSpec : ITextualFieldSpec
 		where TTextualSpec : ITextualSpec<TTextualFieldSpec>

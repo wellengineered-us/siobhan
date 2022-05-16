@@ -1,8 +1,9 @@
 ﻿/*
-	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Copyright ©2020-2022 WellEngineered.us, all rights reserved.
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
+#if ASYNC_ALL_THE_WAY_DOWN
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -10,7 +11,6 @@ using System.Threading.Tasks;
 
 using NUnit.Framework;
 
-using WellEngineered.Siobhan.Middleware;
 using WellEngineered.Siobhan.Primitives;
 
 namespace WellEngineered.Siobhan.UnitTests.Cli.Primitives._
@@ -26,16 +26,71 @@ namespace WellEngineered.Siobhan.UnitTests.Cli.Primitives._
 
 		#endregion
 
+		#region Methods/Operators
+
+		private static async IAsyncEnumerable<int> GetIntsAsync()
+		{
+			await Task.CompletedTask;
+			for (int i = 1; i <= 16; i = i * 2)
+				yield return i;
+		}
+
+		[Test]
+		public async ValueTask ShouldCreateTestAsync()
+		{
+			IAsyncEnumerable<int> asyncEnumerable;
+
+			asyncEnumerable = new AsyncIntegerYielder();
+
+			Assert.IsNotNull(asyncEnumerable);
+
+			await foreach (int i in asyncEnumerable)
+			{
+				await Console.Out.WriteLineAsync(i.ToString());
+			}
+		}
+
+		[Test]
+		public async ValueTask ShouldForEachTestAsync()
+		{
+			IAsyncEnumerable<string> asyncEnumerable = new AsyncForEachLifecycleYieldStateMachine<int, string>(GetIntsAsync(), async (index, item) =>
+																																{
+																																	await Task.CompletedTask;
+																																	return item.ToString("00");
+																																});
+
+			Assert.IsNotNull(asyncEnumerable);
+
+			await foreach (string s in asyncEnumerable)
+			{
+				await Console.Out.WriteLineAsync(s);
+			}
+		}
+
+		#endregion
+
+		#region Classes/Structs/Interfaces/Enums/Delegates
+
 		public sealed class AsyncIntegerYielder : AsyncLifecycleYieldStateMachine<int>
 		{
+			#region Constructors/Destructors
+
 			public AsyncIntegerYielder()
 			{
 			}
 
+			#endregion
+
+			#region Fields/Constants
+
 			readonly int lb = 0;
 			readonly int ub = 10;
 			private int value;
-			
+
+			#endregion
+
+			#region Methods/Operators
+
 			protected override async ValueTask CoreCreateAsync(bool creating, CancellationToken cancellationToken = default)
 			{
 				await Console.Out.WriteLineAsync("create");
@@ -94,49 +149,11 @@ namespace WellEngineered.Siobhan.UnitTests.Cli.Primitives._
 				await Console.Out.WriteLineAsync("start");
 				this.value = this.lb; // for(int value = lb; ...
 			}
-		}
 
-		#region Methods/Operators
-
-		[Test]
-		public async ValueTask ShouldCreateTestAsync()
-		{
-			IAsyncEnumerable<int> asyncEnumerable;
-
-			asyncEnumerable = new AsyncIntegerYielder();
-			
-			Assert.IsNotNull(asyncEnumerable);
-
-			await foreach (int i in asyncEnumerable)
-			{
-				await Console.Out.WriteLineAsync(i.ToString());
-			}
-		}
-		
-		[Test]
-		public async ValueTask ShouldForEachTestAsync()
-		{
-			IAsyncEnumerable<string> asyncEnumerable = new AsyncForEachLifecycleYieldStateMachine<int, string>(GetIntsAsync(), async (index, item) =>
-																																{
-																																	await Task.CompletedTask;
-																																	return item.ToString("00");
-																																});
-			
-			Assert.IsNotNull(asyncEnumerable);
-
-			await foreach (string s in asyncEnumerable)
-			{
-				await Console.Out.WriteLineAsync(s);
-			}
-		}
-
-		private static async IAsyncEnumerable<int> GetIntsAsync()
-		{
-			await Task.CompletedTask;
-			for (int i = 1; i <= 16; i = i * 2)
-				yield return i;
+			#endregion
 		}
 
 		#endregion
 	}
 }
+#endif

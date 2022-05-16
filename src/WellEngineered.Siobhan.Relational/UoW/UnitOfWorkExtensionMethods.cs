@@ -1,5 +1,5 @@
 ﻿/*
-	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Copyright ©2020-2022 WellEngineered.us, all rights reserved.
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
-using System.Threading;
 
 using WellEngineered.Siobhan.Model;
 using WellEngineered.Solder.Primitives;
@@ -18,7 +17,7 @@ namespace WellEngineered.Siobhan.Relational.UoW
 	/// <summary>
 	/// Provides extension methods for unit of work instances.
 	/// </summary>
-	public static class UnitOfWorkExtensionMethods
+	public static partial class UnitOfWorkExtensionMethods
 	{
 		#region Fields/Constants
 
@@ -87,19 +86,6 @@ namespace WellEngineered.Siobhan.Relational.UoW
 			return records;
 		}
 
-		public static IAsyncEnumerable<ISiobhanPayload> ExecuteRecordsAsync(this IUnitOfWork unitOfWork, CommandType commandType, string commandText, IEnumerable<DbParameter> commandParameters, Action<int> rowsAffectedCallback, CancellationToken cancellationToken)
-		{
-			IAsyncEnumerable<ISiobhanPayload> records;
-
-			if ((object)unitOfWork == null)
-				throw new ArgumentNullException(nameof(unitOfWork));
-
-			// DO NOT DISPOSE OF DATA READER HERE - THE YIELD STATE MACHINE BELOW WILL DO THIS
-			records = AdoNetStreamingFacade.ExecuteRecordsAsync(unitOfWork.Connection, unitOfWork.Transaction, commandType, commandText, commandParameters, rowsAffectedCallback, cancellationToken);
-
-			return records;
-		}
-
 		/// <summary>
 		/// An extension method to execute a result query operation against a target unit of work.
 		/// DO NOT DISPOSE OF UNIT OF WORK CONTEXT - UP TO THE CALLER.
@@ -118,19 +104,6 @@ namespace WellEngineered.Siobhan.Relational.UoW
 
 			// DO NOT DISPOSE OF DATA READER HERE - THE YIELD STATE MACHINE BELOW WILL DO THIS
 			results = AdoNetStreamingFacade.ExecuteResults(unitOfWork.Connection, unitOfWork.Transaction, commandType, commandText, commandParameters);
-
-			return results;
-		}
-
-		public static IAsyncEnumerable<IAdoNetStreamingResult> ExecuteResultsAsync(this IUnitOfWork unitOfWork, CommandType commandType, string commandText, IEnumerable<DbParameter> commandParameters, CancellationToken cancellationToken)
-		{
-			IAsyncEnumerable<IAdoNetStreamingResult> results;
-
-			if ((object)unitOfWork == null)
-				throw new ArgumentNullException(nameof(unitOfWork));
-
-			// DO NOT DISPOSE OF DATA READER HERE - THE YIELD STATE MACHINE BELOW WILL DO THIS
-			results = AdoNetStreamingFacade.ExecuteResultsAsync(unitOfWork.Connection, unitOfWork.Transaction, commandType, commandText, commandParameters, cancellationToken);
 
 			return results;
 		}
@@ -181,19 +154,6 @@ namespace WellEngineered.Siobhan.Relational.UoW
 			return records;
 		}
 
-		public static IAsyncEnumerable<ISiobhanPayload> ExecuteSchemaRecordsAsync(this IUnitOfWork unitOfWork, CommandType commandType, string commandText, IEnumerable<DbParameter> commandParameters, Action<int> rowsAffectedCallback, CancellationToken cancellationToken)
-		{
-			IAsyncEnumerable<ISiobhanPayload> records;
-
-			if ((object)unitOfWork == null)
-				throw new ArgumentNullException(nameof(unitOfWork));
-
-			// DO NOT DISPOSE OF DATA READER HERE - THE YIELD STATE MACHINE BELOW WILL DO THIS
-			records = AdoNetStreamingFacade.ExecuteSchemaRecordsAsync(unitOfWork.Connection, unitOfWork.Transaction, commandType, commandText, commandParameters, rowsAffectedCallback, cancellationToken);
-
-			return records;
-		}
-
 		/// <summary>
 		/// An extension method to execute a result query operation against a target unit of work.
 		/// DO NOT DISPOSE OF UNIT OF WORK CONTEXT - UP TO THE CALLER.
@@ -211,18 +171,6 @@ namespace WellEngineered.Siobhan.Relational.UoW
 				throw new ArgumentNullException(nameof(unitOfWork));
 
 			results = AdoNetStreamingFacade.ExecuteSchemaResults(unitOfWork.Connection, unitOfWork.Transaction, commandType, commandText, commandParameters);
-
-			return results;
-		}
-
-		public static IAsyncEnumerable<IAdoNetStreamingResult> ExecuteSchemaResultsAsync(this IUnitOfWork unitOfWork, CommandType commandType, string commandText, IEnumerable<DbParameter> commandParameters, CancellationToken cancellationToken)
-		{
-			IAsyncEnumerable<IAdoNetStreamingResult> results;
-
-			if ((object)unitOfWork == null)
-				throw new ArgumentNullException(nameof(unitOfWork));
-
-			results = AdoNetStreamingFacade.ExecuteSchemaResultsAsync(unitOfWork.Connection, unitOfWork.Transaction, commandType, commandText, commandParameters, cancellationToken);
 
 			return results;
 		}

@@ -1,5 +1,5 @@
 ﻿/*
-	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Copyright ©2020-2022 WellEngineered.us, all rights reserved.
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
@@ -10,14 +10,14 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 
 using WellEngineered.Solder.Injection;
 using WellEngineered.Solder.Primitives;
 
 namespace WellEngineered.Siobhan.Relational
 {
-	public class AdoNetStreamingFacade : IAdoNetStreamingFacade
+	public partial class AdoNetStreamingFacade
+		: IAdoNetStreamingFacade
 	{
 		#region Constructors/Destructors
 
@@ -52,7 +52,7 @@ namespace WellEngineered.Siobhan.Relational
 		{
 			DbParameter dbParameter;
 
-			Guid? _ = AssemblyDomain.Default.ResourceManager.Enter();
+			Guid? _ = ResourceManager.__.Enter();
 
 			if ((object)dbConnection == null)
 				throw new ArgumentNullException(nameof(dbConnection));
@@ -93,7 +93,7 @@ namespace WellEngineered.Siobhan.Relational
 		{
 			AdoNetStreamingDataReader dbDataReader;
 
-			Guid? _ = AssemblyDomain.Default.ResourceManager.Enter();
+			Guid? _ = ResourceManager.__.Enter();
 
 			if ((object)dbConnection == null)
 				throw new ArgumentNullException(nameof(dbConnection));
@@ -186,11 +186,6 @@ namespace WellEngineered.Siobhan.Relational
 			ResourceManager.__.Leave(_);
 		}
 
-		public IAsyncEnumerable<IAdoNetStreamingRecord> ExecuteRecordsAsync(DbConnection dbConnection, DbTransaction dbTransaction, CommandType commandType, string commandText, IEnumerable<DbParameter> commandParameters, Action<int> recordsAffectedCallback, CancellationToken cancellationToken)
-		{
-			throw new NotImplementedException();
-		}
-
 		/// <summary>
 		/// Execute a command against a data source, mapping the data reader to an enumerable of results, each with an enumerable of record dictionaries.
 		/// This method performs LAZY LOADING/DEFERRED EXECUTION.
@@ -237,12 +232,7 @@ namespace WellEngineered.Siobhan.Relational
 				ResourceManager.__.Print(_, "after yield loop");
 			}
 
-			AssemblyDomain.Default.ResourceManager.Leave(_);
-		}
-
-		public IAsyncEnumerable<IAdoNetStreamingResult> ExecuteResultsAsync(DbConnection dbConnection, DbTransaction dbTransaction, CommandType commandType, string commandText, IEnumerable<DbParameter> commandParameters, CancellationToken cancellationToken)
-		{
-			throw new NotImplementedException();
+			ResourceManager.__.Leave(_);
 		}
 
 		/// <summary>
@@ -292,12 +282,7 @@ namespace WellEngineered.Siobhan.Relational
 				ResourceManager.__.Print(_, "after yield loop");
 			}
 
-			AssemblyDomain.Default.ResourceManager.Leave(_);
-		}
-
-		public IAsyncEnumerable<IAdoNetStreamingRecord> ExecuteSchemaRecordsAsync(DbConnection dbConnection, DbTransaction dbTransaction, CommandType commandType, string commandText, IEnumerable<DbParameter> commandParameters, Action<int> recordsAffectedCallback, CancellationToken cancellationToken)
-		{
-			throw new NotImplementedException();
+			ResourceManager.__.Leave(_);
 		}
 
 		/// <summary>
@@ -346,12 +331,7 @@ namespace WellEngineered.Siobhan.Relational
 				ResourceManager.__.Print(_, "after yield loop");
 			}
 
-			AssemblyDomain.Default.ResourceManager.Leave(_);
-		}
-
-		public IAsyncEnumerable<IAdoNetStreamingResult> ExecuteSchemaResultsAsync(DbConnection dbConnection, DbTransaction dbTransaction, CommandType commandType, string commandText, IEnumerable<DbParameter> commandParameters, CancellationToken cancellationToken)
-		{
-			throw new NotImplementedException();
+			ResourceManager.__.Leave(_);
 		}
 
 		/// <summary>
@@ -409,12 +389,7 @@ namespace WellEngineered.Siobhan.Relational
 			if ((object)recordsAffectedCallback != null)
 				recordsAffectedCallback(recordsAffected);
 
-			AssemblyDomain.Default.ResourceManager.Leave(_);
-		}
-
-		public IAsyncEnumerable<IAdoNetStreamingRecord> GetRecordsFromReaderAsync(DbDataReader dbDataReader, Action<int> recordsAffectedCallback, CancellationToken cancellationToken)
-		{
-			throw new NotImplementedException();
+			ResourceManager.__.Leave(_);
 		}
 
 		/// <summary>
@@ -460,12 +435,7 @@ namespace WellEngineered.Siobhan.Relational
 				ResourceManager.__.Print(_, "after yield loop");
 			}
 
-			AssemblyDomain.Default.ResourceManager.Leave(_);
-		}
-
-		public IAsyncEnumerable<IAdoNetStreamingResult> GetResultsFromReaderAsync(DbDataReader dbDataReader, CancellationToken cancellationToken)
-		{
-			throw new NotImplementedException();
+			ResourceManager.__.Leave(_);
 		}
 
 		/// <summary>
@@ -545,11 +515,6 @@ namespace WellEngineered.Siobhan.Relational
 			ResourceManager.__.Leave(_);
 		}
 
-		public IAsyncEnumerable<IAdoNetStreamingRecord> GetSchemaRecordsFromReaderAsync(DbDataReader dbDataReader, Action<int> recordsAffectedCallback, CancellationToken cancellationToken)
-		{
-			throw new NotImplementedException();
-		}
-
 		/// <summary>
 		/// Execute a command against a data source, mapping the data reader GetSchemaTable() result to an enumerable of results, each with an enumerable of records.
 		/// This method performs LAZY LOADING/DEFERRED EXECUTION.
@@ -593,12 +558,7 @@ namespace WellEngineered.Siobhan.Relational
 				ResourceManager.__.Print(_, "after yield loop");
 			}
 
-			AssemblyDomain.Default.ResourceManager.Leave(_);
-		}
-
-		public IAsyncEnumerable<IAdoNetStreamingResult> GetSchemaResultsFromReaderAsync(DbDataReader dbDataReader, CancellationToken cancellationToken)
-		{
-			throw new NotImplementedException();
+			ResourceManager.__.Leave(_);
 		}
 
 		#endregion
@@ -623,7 +583,7 @@ namespace WellEngineered.Siobhan.Relational
 
 			#region Fields/Constants
 
-			internal static readonly IResourceManager __ = AssemblyDomain.Default.ResourceManager;
+			internal static readonly IResourceManager __ = __;
 
 			#endregion
 		}

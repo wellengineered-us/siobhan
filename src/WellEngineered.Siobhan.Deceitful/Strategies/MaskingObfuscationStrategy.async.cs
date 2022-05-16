@@ -3,6 +3,7 @@
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
+#if ASYNC_ALL_THE_WAY_DOWN
 using System;
 using System.Text;
 using System.Threading;
@@ -94,3 +95,4 @@ namespace WellEngineered.Siobhan.Deceitful.Strategies
 		#endregion
 	}
 }
+#endif

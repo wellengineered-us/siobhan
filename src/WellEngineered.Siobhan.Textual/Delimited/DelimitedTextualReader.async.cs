@@ -1,5 +1,5 @@
 ﻿/*
-	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Copyright ©2020-2022 WellEngineered.us, all rights reserved.
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
@@ -38,7 +38,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 		{
 			return GetReadHeaderFieldsAsync().ToAsyncLifecycleEnumerable();
 
-			async IAsyncEnumerable<IDelimitedTextualFieldSpec> GetReadHeaderFieldsAsync(CancellationToken cancellationToken = default)
+			async IAsyncEnumerable<IDelimitedTextualFieldSpec> GetReadHeaderFieldsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 			{
 				if (this.ParserState.recordIndex == 0 &&
 					this.TextualSpec.IsFirstRecordHeader)
@@ -73,7 +73,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 			return this.ResumableParserMainLoopAsync(false, cancellationToken).ToAsyncLifecycleEnumerable();
 		}
 
-		private async IAsyncEnumerable<ITextualStreamingRecord> ResumableParserMainLoopAsync(bool once, CancellationToken cancellationToken = default)
+		private async IAsyncEnumerable<ITextualStreamingRecord> ResumableParserMainLoopAsync(bool once, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 		{
 			int read;
 			char ch;

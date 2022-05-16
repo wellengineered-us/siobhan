@@ -1,11 +1,10 @@
 ﻿/*
-	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Copyright ©2020-2022 WellEngineered.us, all rights reserved.
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 
 using WellEngineered.Siobhan.Primitives.Configuration;
 using WellEngineered.Solder.Configuration;
@@ -111,11 +110,6 @@ namespace WellEngineered.Siobhan.Deceitful.Configuration
 		protected override IEnumerable<IMessage> CoreValidate(object context)
 		{
 			yield break;
-		}
-
-		protected override IAsyncEnumerable<IMessage> CoreValidateAsync(object context, CancellationToken cancellationToken = new CancellationToken())
-		{
-			return null;
 		}
 
 		#endregion

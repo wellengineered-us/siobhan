@@ -1,5 +1,5 @@
 ﻿/*
-	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Copyright ©2020-2022 WellEngineered.us, all rights reserved.
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
@@ -15,7 +15,11 @@ namespace WellEngineered.Siobhan.Relational.UoW
 	/// Represents an atomic set of data operations on a single connection/transaction.
 	/// </summary>
 	public sealed partial class UnitOfWork
+#if ASYNC_ALL_THE_WAY_DOWN
 		: DualLifecycle,
+#else
+		: Lifecycle,
+#endif
 			IUnitOfWork
 	{
 		#region Constructors/Destructors

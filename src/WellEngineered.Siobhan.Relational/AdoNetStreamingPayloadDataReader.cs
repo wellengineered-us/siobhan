@@ -1,5 +1,5 @@
 ﻿/*
-	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Copyright ©2020-2022 WellEngineered.us, all rights reserved.
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
@@ -17,7 +17,7 @@ using WellEngineered.Siobhan.Model;
 
 namespace WellEngineered.Siobhan.Relational
 {
-	public class AdoNetStreamingPayloadDataReader : DbDataReader
+	public partial class AdoNetStreamingPayloadDataReader : DbDataReader
 	{
 		#region Constructors/Destructors
 

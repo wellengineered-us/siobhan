@@ -1,5 +1,5 @@
 ﻿/*
-	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Copyright ©2020-2022 WellEngineered.us, all rights reserved.
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
@@ -29,9 +29,9 @@ namespace WellEngineered.Siobhan.Deceitful.Strategies
 
 		#region Methods/Operators
 
-		protected sealed override IUnknownSolderConfiguration<TObfuscationStrategySpec> CoreCreateGenericTypedUnknownConfiguration()
+		protected sealed override IUnknownSolderConfiguration<TObfuscationStrategySpec> CoreCreateGenericTypedUnknownConfiguration(IUnknownSolderConfiguration untypedUnknownSolderConfiguration)
 		{
-			return new UnknownSiobhanConfiguration<TObfuscationStrategySpec>(this.Configuration);
+			return new UnknownSiobhanConfiguration<TObfuscationStrategySpec>(untypedUnknownSolderConfiguration);
 		}
 
 		protected abstract object CoreGetObfuscatedValue(IObfuscationContext obfuscationContext, ColumnConfiguration columnConfiguration, ISiobhanField field, object originalFieldValue);

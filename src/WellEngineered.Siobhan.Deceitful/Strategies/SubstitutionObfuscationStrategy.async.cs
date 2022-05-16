@@ -3,6 +3,7 @@
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
+#if ASYNC_ALL_THE_WAY_DOWN
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,6 +30,8 @@ namespace WellEngineered.Siobhan.Deceitful.Strategies
 			object surrogateValue;
 
 			DictionaryConfiguration dictionaryConfiguration;
+
+			Tuple<bool, object> result;
 
 			if ((object)obfuscationContext == null)
 				throw new ArgumentNullException(nameof(obfuscationContext));
@@ -63,12 +66,15 @@ namespace WellEngineered.Siobhan.Deceitful.Strategies
 
 			surrogateKey = await obfuscationContext.GetValueHashAsync(dictionaryConfiguration.RecordCount, originalFieldValue, cancellationToken);
 
-			if (!await obfuscationContext.TryGetSurrogateValueAsync(dictionaryConfiguration, surrogateKey, out surrogateValue, cancellationToken))
+			result = await obfuscationContext.TryGetSurrogateValueAsync(dictionaryConfiguration, surrogateKey, cancellationToken);
+
+			if ((object)result == null || !result.Item1)
 				throw new InvalidOperationException(string.Format("Failed to obtain surrogate value."));
 
-			return surrogateValue;
+			return surrogateValue = result.Item2;
 		}
 
 		#endregion
 	}
 }
+#endif

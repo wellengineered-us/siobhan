@@ -1,11 +1,12 @@
 ﻿/*
-	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Copyright ©2020-2022 WellEngineered.us, all rights reserved.
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
 #if ASYNC_ALL_THE_WAY_DOWN
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,7 +19,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 	{
 		#region Methods/Operators
 
-		protected override async ValueTask CoreWriteFooterRecordsAsync(IAsyncLifecycleEnumerable<IDelimitedTextualFieldSpec> specs, IAsyncLifecycleEnumerable<ITextualStreamingRecord> footers, CancellationToken cancellationToken = default)
+		protected override ValueTask CoreWriteFooterRecordsAsync(IAsyncLifecycleEnumerable<IDelimitedTextualFieldSpec> specs, IAsyncLifecycleEnumerable<ITextualStreamingRecord> footers, CancellationToken cancellationToken = default)
 		{
 			throw new NotSupportedException(string.Format("Cannot write footer records (via fields) in this version."));
 		}
@@ -48,7 +49,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 				this.HeaderRecordWritten = true;
 			}
 
-			async IAsyncEnumerable<IDelimitedTextualFieldSpec> GetFieldsAsync(IList<IDelimitedTextualFieldSpec> textualSpecTextualHeaderSpecs, CancellationToken cancellationToken = default)
+			async IAsyncEnumerable<IDelimitedTextualFieldSpec> GetFieldsAsync(IList<IDelimitedTextualFieldSpec> textualSpecTextualHeaderSpecs, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 			{
 				if ((object)textualSpecTextualHeaderSpecs == null)
 					throw new ArgumentNullException(nameof(textualSpecTextualHeaderSpecs));

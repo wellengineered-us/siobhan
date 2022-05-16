@@ -1,16 +1,13 @@
 ﻿/*
-	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Copyright ©2020-2022 WellEngineered.us, all rights reserved.
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 using NUnit.Framework;
 
-using WellEngineered.Siobhan.Middleware;
 using WellEngineered.Siobhan.Primitives;
 
 namespace WellEngineered.Siobhan.UnitTests.Cli.Primitives._
@@ -26,16 +23,66 @@ namespace WellEngineered.Siobhan.UnitTests.Cli.Primitives._
 
 		#endregion
 
+		#region Methods/Operators
+
+		private static IEnumerable<int> GetInts()
+		{
+			for (int i = 1; i <= 16; i = i * 2)
+				yield return i;
+		}
+
+		[Test]
+		public void ShouldCreateTest()
+		{
+			IEnumerable<int> enumerable;
+
+			enumerable = new IntegerYielder();
+
+			Assert.IsNotNull(enumerable);
+
+			foreach (int i in enumerable)
+			{
+				Console.WriteLine(i);
+			}
+		}
+
+		[Test]
+		public void ShouldForEachTest()
+		{
+			IEnumerable<string> enumerable = new ForEachLifecycleYieldStateMachine<int, string>(GetInts(), (index, item) => item.ToString("00"));
+
+			Assert.IsNotNull(enumerable);
+
+			foreach (string s in enumerable)
+			{
+				Console.WriteLine(s);
+			}
+		}
+
+		#endregion
+
+		#region Classes/Structs/Interfaces/Enums/Delegates
+
 		public sealed class IntegerYielder : LifecycleYieldStateMachine<int>
 		{
+			#region Constructors/Destructors
+
 			public IntegerYielder()
 			{
 			}
 
+			#endregion
+
+			#region Fields/Constants
+
 			readonly int lb = 0;
 			readonly int ub = 10;
 			private int value;
-			
+
+			#endregion
+
+			#region Methods/Operators
+
 			protected override void CoreCreate(bool creating)
 			{
 				Console.Out.WriteLine("create");
@@ -95,42 +142,8 @@ namespace WellEngineered.Siobhan.UnitTests.Cli.Primitives._
 				Console.Out.WriteLine("start");
 				this.value = this.lb; // for(int value = lb; ...
 			}
-		}
 
-		#region Methods/Operators
-
-		[Test]
-		public void ShouldCreateTest()
-		{
-			IEnumerable<int> enumerable;
-
-			enumerable = new IntegerYielder();
-			
-			Assert.IsNotNull(enumerable);
-
-			foreach (int i in enumerable)
-			{
-				Console.WriteLine(i);
-			}
-		}
-		
-		[Test]
-		public void ShouldForEachTest()
-		{
-			IEnumerable<string> enumerable = new ForEachLifecycleYieldStateMachine<int, string>(GetInts(), (index, item) => item.ToString("00"));
-			
-			Assert.IsNotNull(enumerable);
-
-			foreach (string s in enumerable)
-			{
-				Console.WriteLine(s);
-			}
-		}
-
-		private static IEnumerable<int> GetInts()
-		{
-			for (int i = 1; i <= 16; i = i * 2)
-				yield return i;
+			#endregion
 		}
 
 		#endregion

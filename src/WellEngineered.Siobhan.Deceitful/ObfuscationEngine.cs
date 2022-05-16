@@ -1,5 +1,5 @@
 ﻿/*
-	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Copyright ©2020-2022 WellEngineered.us, all rights reserved.
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 using WellEngineered.Siobhan.Deceitful.Configuration;
 using WellEngineered.Siobhan.Model;
@@ -18,20 +16,34 @@ using WellEngineered.Solder.Primitives;
 
 namespace WellEngineered.Siobhan.Deceitful
 {
-	public sealed class ObfuscationEngine
+	public sealed partial class ObfuscationEngine
 		: SiobhanComponent<ObfuscationConfiguration>,
 			IObfuscationEngine,
 			IObfuscationContext
 	{
 		#region Constructors/Destructors
 
-		public ObfuscationEngine(ResolveDictionaryValueDelegate resolveDictionaryValueCallback)
+#if ASYNC_ALL_THE_WAY_DOWN
+		public ObfuscationEngine(ResolveDictionaryValueDelegate resolveDictionaryValueCallback, AsyncResolveDictionaryValueDelegate asyncResolveDictionaryValueCallback)
 		{
 			if ((object)resolveDictionaryValueCallback == null)
 				throw new ArgumentNullException(nameof(resolveDictionaryValueCallback));
 
+			if ((object)asyncResolveDictionaryValueCallback == null)
+				throw new ArgumentNullException(nameof(asyncResolveDictionaryValueCallback));
+
+			this.resolveDictionaryValueCallback = resolveDictionaryValueCallback;
+			this.asyncResolveDictionaryValueCallback = asyncResolveDictionaryValueCallback;
+		}
+#else
+		public ObfuscationEngine(ResolveDictionaryValueDelegate resolveDictionaryValueCallback, object unused = null)
+		{
+			if ((object)resolveDictionaryValueCallback == null)
+				throw new ArgumentNullException(nameof(resolveDictionaryValueCallback));
+			
 			this.resolveDictionaryValueCallback = resolveDictionaryValueCallback;
 		}
+#endif
 
 		#endregion
 
@@ -209,27 +221,22 @@ namespace WellEngineered.Siobhan.Deceitful
 			return hash.GetValueOrDefault();
 		}
 
-		public object GetObfuscatedValue(ISiobhanField field, object columnValue)
+		public object GetObfuscatedValue(ISiobhanField field, object originalFieldValue)
 		{
 			object value;
 
 			if ((object)field == null)
 				throw new ArgumentNullException(nameof(field));
 
-			if ((object)columnValue == DBNull.Value)
-				columnValue = null;
+			if ((object)originalFieldValue == DBNull.Value)
+				originalFieldValue = null;
 
 			if (this.Configuration.EnablePassThru ?? false)
-				return columnValue; // pass-thru (safety switch)
+				return originalFieldValue; // pass-thru (safety switch)
 
-			value = this._GetObfuscatedValue(field, columnValue);
+			value = this._GetObfuscatedValue(field, originalFieldValue);
 
 			return value;
-		}
-
-		public ValueTask<object> GetObfuscatedValueAsync(ISiobhanField field, object originalFieldValue, CancellationToken cancellationToken = default)
-		{
-			return default;
 		}
 
 		public ILifecycleEnumerable<ISiobhanPayload> GetObfuscatedValues(ILifecycleEnumerable<ISiobhanPayload> records)
@@ -277,11 +284,6 @@ namespace WellEngineered.Siobhan.Deceitful
 			}
 		}
 
-		public IAsyncLifecycleEnumerable<ISiobhanPayload> GetObfuscatedValuesAsync(IAsyncLifecycleEnumerable<ISiobhanPayload> asyncRecords, CancellationToken cancellationToken = default)
-		{
-			return null;
-		}
-
 		long IObfuscationContext.GetSignHash(object value)
 		{
 			long hash;
@@ -291,11 +293,6 @@ namespace WellEngineered.Siobhan.Deceitful
 			return hash;
 		}
 
-		public ValueTask<long> GetSignHashAsync(object value, CancellationToken cancellationToken = default)
-		{
-			return default;
-		}
-
 		long IObfuscationContext.GetValueHash(long? size, object value)
 		{
 			long hash;
@@ -303,11 +300,6 @@ namespace WellEngineered.Siobhan.Deceitful
 			hash = this.GetBoundedHash(size ?? DEFAULT_HASH_BUCKET_SIZE, value);
 
 			return hash;
-		}
-
-		public ValueTask<long> GetValueHashAsync(long? size, object value, CancellationToken cancellationToken = default)
-		{
-			return default;
 		}
 
 		private object ResolveDictionaryValue(DictionaryConfiguration dictionaryConfiguration, object surrogateKey)
@@ -324,7 +316,7 @@ namespace WellEngineered.Siobhan.Deceitful
 			return this.ResolveDictionaryValueCallback(dictionaryConfiguration, surrogateKey);
 		}
 
-		bool IObfuscationContext.TryGetSurrogateValue(DictionaryConfiguration dictionaryConfiguration, object surrogateKey, out object surrogateValue)
+		public bool TryGetSurrogateValue(DictionaryConfiguration dictionaryConfiguration, object surrogateKey, out object surrogateValue)
 		{
 			IDictionary<object, object> dictionaryCache;
 
@@ -354,12 +346,6 @@ namespace WellEngineered.Siobhan.Deceitful
 			}
 
 			return true;
-		}
-
-		public ValueTask<bool> TryGetSurrogateValueAsync(DictionaryConfiguration dictionaryConfiguration, object surrogateKey, out object surrogateValue, CancellationToken cancellationToken = default)
-		{
-			surrogateValue = null;
-			return default;
 		}
 
 		#endregion

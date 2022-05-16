@@ -1,11 +1,8 @@
 {
-	"profiles":
-	{
-		"default":
-		{
+	"profiles": {
+		"default": {
 			"commandName": "Project",
-			"environmentVariables":
-			{
+			"environmentVariables": {
 				"SOLDER_HOOK_UNHANDLED_EXCEPTIONS": "false"
 			}
 		}

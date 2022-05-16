@@ -1,5 +1,5 @@
 /*
-	Copyright ©2020-2021 WellEngineered.us, all rights reserved.
+	Copyright ©2020-2022 WellEngineered.us, all rights reserved.
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
@@ -22,7 +22,6 @@ namespace WellEngineered.Siobhan.Relational
 		#region Fields/Constants
 
 		private readonly long resultIndex;
-		private IAsyncEnumerable<IAdoNetStreamingRecord> asyncRecords;
 		private IEnumerable<IAdoNetStreamingRecord> records;
 		private int recordsAffected;
 
@@ -35,18 +34,6 @@ namespace WellEngineered.Siobhan.Relational
 			get
 			{
 				return this.resultIndex;
-			}
-		}
-
-		public IAsyncEnumerable<IAdoNetStreamingRecord> AsyncRecords
-		{
-			get
-			{
-				return this.asyncRecords;
-			}
-			set
-			{
-				this.asyncRecords = value;
 			}
 		}
 

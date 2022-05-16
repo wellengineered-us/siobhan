@@ -3,6 +3,7 @@
 	Distributed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 */
 
+#if ASYNC_ALL_THE_WAY_DOWN
 using System;
 using System.IO;
 using System.Security.Cryptography;
@@ -108,3 +109,4 @@ namespace WellEngineered.Siobhan.Deceitful.Strategies
 		#endregion
 	}
 }
+#endif
