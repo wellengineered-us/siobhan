@@ -12,17 +12,17 @@ namespace WellEngineered.Siobhan.Model
 	{
 		#region Methods/Operators
 
-		SiobhanSiobhanSchemaBuilder AddField(string fieldName, Type fieldType, bool isFieldOptional, bool isFieldKeyPart, ISiobhanSchema fieldSchema = null);
+		SiobhanSchemaBuilder AddField(string fieldName, Type fieldType, bool isFieldOptional, bool isFieldKeyPart, ISiobhanSchema fieldSchema = null);
 
-		SiobhanSiobhanSchemaBuilder AddFields(IEnumerable<ISiobhanField> fields);
+		SiobhanSchemaBuilder AddFields(IEnumerable<ISiobhanField> fields);
 
 		ISiobhanSchema Build();
 
-		SiobhanSiobhanSchemaBuilder WithName(string value);
+		SiobhanSchemaBuilder WithName(string value);
 
-		SiobhanSiobhanSchemaBuilder WithType(SiobhanSchemaType value);
+		SiobhanSchemaBuilder WithType(SiobhanSchemaType value);
 
-		SiobhanSiobhanSchemaBuilder WithVersion(int value);
+		SiobhanSchemaBuilder WithVersion(int value);
 
 		#endregion
 	}

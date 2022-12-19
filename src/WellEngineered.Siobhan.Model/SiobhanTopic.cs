@@ -22,9 +22,19 @@ namespace WellEngineered.Siobhan.Model
 		private Guid? topicId;
 		private string topicName;
 
+		private static readonly ISiobhanTopic none = new SiobhanTopic();
+
 		#endregion
 
 		#region Properties/Indexers/Events
+
+		public static ISiobhanTopic None
+		{
+			get
+			{
+				return none;
+			}
+		}
 
 		public Guid? TopicId
 		{

@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace WellEngineered.Siobhan.Primitives
 {
@@ -20,9 +21,21 @@ namespace WellEngineered.Siobhan.Primitives
 			if ((object)asyncEnumerable == null)
 				throw new ArgumentNullException(nameof(asyncEnumerable));
 
-			return new AsyncForEachLifecycleYieldStateMachine<TItem, TItem>(asyncEnumerable, null);
+			return new AsyncForEachLifecycleYieldStateMachine<TItem, TItem>(asyncEnumerable, async (index, item) => await Task.FromResult(item));
 		}
 
+		public static async ValueTask ForceAsyncEnumeration<T>(this IAsyncEnumerable<T> asyncEnumerable,
+			CancellationToken cancellationToken = default)
+		{
+			if ((object)asyncEnumerable == null)
+				throw new ArgumentNullException(nameof(asyncEnumerable));
+
+			await foreach (T item in asyncEnumerable.WithCancellation(cancellationToken))
+			{
+				// do nothing
+			}
+		}
+		
 		#endregion
 	}
 }

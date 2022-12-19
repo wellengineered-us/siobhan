@@ -29,8 +29,8 @@ namespace WellEngineered.Siobhan.Model
 
 			key = new SiobhanPayload();
 			value = new SiobhanPayload();
-			k = new SiobhanSiobhanSchemaBuilder();
-			v = new SiobhanSiobhanSchemaBuilder();
+			k = new SiobhanSchemaBuilder();
+			v = new SiobhanSchemaBuilder();
 
 			foreach (IGrouping<bool, ISiobhanField> grouping in groups)
 			{

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace WellEngineered.Siobhan.Model
 {
-	public interface ISiobhanPartition : IDictionary<string, object>
+	public interface ISiobhanPartition : IReadOnlyDictionary<string, object>
 	{
 	}
 }

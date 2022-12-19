@@ -14,6 +14,7 @@ namespace WellEngineered.Siobhan.Model
 		long? RelativeIndex
 		{
 			get;
+			set;
 		}
 
 		DateTime? WallTimeUtc

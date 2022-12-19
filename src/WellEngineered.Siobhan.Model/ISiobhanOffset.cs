@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace WellEngineered.Siobhan.Model
 {
-	public interface ISiobhanOffset : IDictionary<string, object>
+	public interface ISiobhanOffset : IReadOnlyDictionary<string, object>
 	{
 	}
 }

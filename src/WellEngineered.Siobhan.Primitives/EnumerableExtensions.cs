@@ -17,7 +17,18 @@ namespace WellEngineered.Siobhan.Primitives
 			if ((object)enumerable == null)
 				throw new ArgumentNullException(nameof(enumerable));
 
-			return new ForEachLifecycleYieldStateMachine<TItem, TItem>(enumerable, null);
+			return new ForEachLifecycleYieldStateMachine<TItem, TItem>(enumerable,  (index, item) => item);
+		}
+		
+		public static void ForceEnumeration<T>(this IEnumerable<T> enumerable)
+		{
+			if ((object)enumerable == null)
+				throw new ArgumentNullException(nameof(enumerable));
+
+			foreach (T item in enumerable)
+			{
+				// do nothing
+			}
 		}
 
 		#endregion

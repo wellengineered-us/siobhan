@@ -9,16 +9,16 @@ using System.Linq;
 
 namespace WellEngineered.Siobhan.Model
 {
-	public sealed class SiobhanSiobhanSchemaBuilder : ISiobhanSchemaBuilder, ISiobhanSchema
+	public sealed class SiobhanSchemaBuilder : ISiobhanSchemaBuilder, ISiobhanSchema
 	{
 		#region Constructors/Destructors
 
-		public SiobhanSiobhanSchemaBuilder()
+		public SiobhanSchemaBuilder()
 			: this(new Dictionary<string, ISiobhanField>(StringComparer.OrdinalIgnoreCase))
 		{
 		}
 
-		public SiobhanSiobhanSchemaBuilder(Dictionary<string, ISiobhanField> fields)
+		public SiobhanSchemaBuilder(Dictionary<string, ISiobhanField> fields)
 		{
 			if ((object)fields == null)
 				throw new ArgumentNullException(nameof(fields));
@@ -115,39 +115,39 @@ namespace WellEngineered.Siobhan.Model
 		private static void AssertCanSet(string propertyName, object propertyValue, object newValue)
 		{
 			if (propertyValue != null && propertyValue != newValue)
-				throw new InvalidOperationException(string.Format("SiobhanSiobhanSchemaBuilder: Property '{0}' has already been set.", propertyName));
+				throw new InvalidOperationException(string.Format("SiobhanSchemaBuilder: Property '{0}' has already been set.", propertyName));
 		}
 
 		private static void AssertCanSet(string propertyName, bool propertyValue, bool newValue)
 		{
 			if (propertyValue != false && propertyValue != newValue)
-				throw new InvalidOperationException(string.Format("SiobhanSiobhanSchemaBuilder: Property '{0}' has already been set.", propertyName));
+				throw new InvalidOperationException(string.Format("SiobhanSchemaBuilder: Property '{0}' has already been set.", propertyName));
 		}
 
 		private static void AssertCanSet(string propertyName, int propertyValue, int newValue)
 		{
 			if (propertyValue != 0 && propertyValue != newValue)
-				throw new InvalidOperationException(string.Format("SiobhanSiobhanSchemaBuilder: Property '{0}' has already been set.", propertyName));
+				throw new InvalidOperationException(string.Format("SiobhanSchemaBuilder: Property '{0}' has already been set.", propertyName));
 		}
 
-		public static SiobhanSiobhanSchemaBuilder Create()
+		public static SiobhanSchemaBuilder Create()
 		{
-			return new SiobhanSiobhanSchemaBuilder() { SchemaType = SiobhanSchemaType.Object };
+			return new SiobhanSchemaBuilder() { SchemaType = SiobhanSchemaType.Object };
 		}
 
 		public static ISiobhanSchema FromType(Type type)
 		{
-			SiobhanSiobhanSchemaBuilder siobhanSchemaBuilder;
+			SiobhanSchemaBuilder siobhanSchemaBuilder;
 
 			if ((object)type == null)
 				throw new ArgumentNullException(nameof(type));
 
-			siobhanSchemaBuilder = new SiobhanSiobhanSchemaBuilder();
+			siobhanSchemaBuilder = new SiobhanSchemaBuilder();
 
 			return siobhanSchemaBuilder.Schema;
 		}
 
-		public SiobhanSiobhanSchemaBuilder AddField(string fieldName, Type fieldType, bool isFieldOptional, bool isFieldKeyPart, ISiobhanSchema fieldSchema = null)
+		public SiobhanSchemaBuilder AddField(string fieldName, Type fieldType, bool isFieldOptional, bool isFieldKeyPart, ISiobhanSchema fieldSchema = null)
 		{
 			if ((object)fieldName == null)
 				throw new ArgumentNullException(nameof(fieldName));
@@ -167,7 +167,7 @@ namespace WellEngineered.Siobhan.Model
 			return this;
 		}
 
-		public SiobhanSiobhanSchemaBuilder AddFields(IEnumerable<ISiobhanField> fields)
+		public SiobhanSchemaBuilder AddFields(IEnumerable<ISiobhanField> fields)
 		{
 			if ((object)fields == null)
 				throw new ArgumentNullException(nameof(fields));
@@ -188,21 +188,21 @@ namespace WellEngineered.Siobhan.Model
 			return string.Join(", ", this.Fields.Values.Select(f => $"[{f.FieldName}]@{f.FieldIndex}"));
 		}
 
-		public SiobhanSiobhanSchemaBuilder WithName(string value)
+		public SiobhanSchemaBuilder WithName(string value)
 		{
 			AssertCanSet(nameof(this.SchemaName), this.SchemaName, value);
 			this.SchemaName = value;
 			return this;
 		}
 
-		public SiobhanSiobhanSchemaBuilder WithType(SiobhanSchemaType value)
+		public SiobhanSchemaBuilder WithType(SiobhanSchemaType value)
 		{
 			AssertCanSet(nameof(this.SchemaType), this.SchemaType, value);
 			this.SchemaType = value;
 			return this;
 		}
 
-		public SiobhanSiobhanSchemaBuilder WithVersion(int value)
+		public SiobhanSchemaBuilder WithVersion(int value)
 		{
 			AssertCanSet(nameof(this.SchemaVersion), this.SchemaVersion, value);
 			this.SchemaVersion = value;

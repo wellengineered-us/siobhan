@@ -21,13 +21,13 @@ namespace WellEngineered.Siobhan.Model
 
 		#region Fields/Constants
 
-		private static readonly SiobhanPartition none = new SiobhanPartition();
+		private static readonly ISiobhanPartition none = new SiobhanPartition();
 
 		#endregion
 
 		#region Properties/Indexers/Events
 
-		public static SiobhanPartition None
+		public static ISiobhanPartition None
 		{
 			get
 			{

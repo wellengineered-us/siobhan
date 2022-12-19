@@ -18,17 +18,6 @@ namespace WellEngineered.Siobhan.Middleware
 
 		#region Methods/Operators
 
-		public static void ForceEnumeration<T>(this IEnumerable<T> enumerable)
-		{
-			if ((object)enumerable == null)
-				throw new ArgumentNullException(nameof(enumerable));
-
-			foreach (T item in enumerable)
-			{
-				// do nothing
-			}
-		}
-
 		public static IEnumerable<TItem> GetWrappedEnumerable<TItem>(this IEnumerable<TItem> enumerable, string sourceLabel, Func<long, TItem, TItem> itemCallback, Action<string, long, bool, double> processingCallback)
 		{
 			long itemIndex = 0;

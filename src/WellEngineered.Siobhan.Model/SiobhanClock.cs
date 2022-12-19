@@ -11,8 +11,10 @@ namespace WellEngineered.Siobhan.Model
 	{
 		#region Constructors/Destructors
 
-		public SiobhanClock()
+		public SiobhanClock(long? relativeIndex, DateTime? wallTimeUtc)
 		{
+			this.relativeIndex = relativeIndex;
+			this.wallTimeUtc = wallTimeUtc;
 		}
 
 		#endregion
@@ -20,11 +22,16 @@ namespace WellEngineered.Siobhan.Model
 		#region Fields/Constants
 
 		private long? relativeIndex;
-		private DateTime? wallTimeUtc;
+		private readonly DateTime? wallTimeUtc;
 
 		#endregion
 
 		#region Properties/Indexers/Events
+
+		public static ISiobhanClock GetNowAt(long index = -1L)
+		{
+			return new SiobhanClock(index, DateTime.UtcNow);
+		}
 
 		public long? RelativeIndex
 		{
@@ -43,10 +50,6 @@ namespace WellEngineered.Siobhan.Model
 			get
 			{
 				return this.wallTimeUtc;
-			}
-			set
-			{
-				this.wallTimeUtc = value;
 			}
 		}
 

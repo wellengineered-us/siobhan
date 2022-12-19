@@ -21,17 +21,17 @@ namespace WellEngineered.Siobhan.Model
 
 		#region Fields/Constants
 
-		private static readonly SiobhanOffset none = new SiobhanOffset();
+		private static readonly ISiobhanOffset @default = new SiobhanOffset();
 
 		#endregion
 
 		#region Properties/Indexers/Events
 
-		public static SiobhanOffset None
+		public static ISiobhanOffset Default
 		{
 			get
 			{
-				return none;
+				return @default;
 			}
 		}
 
