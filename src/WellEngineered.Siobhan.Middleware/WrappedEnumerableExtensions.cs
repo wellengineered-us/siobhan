@@ -20,14 +20,14 @@ namespace WellEngineered.Siobhan.Middleware
 
 		public static IEnumerable<TItem> GetWrappedEnumerable<TItem>(this IEnumerable<TItem> enumerable, string sourceLabel, Func<long, TItem, TItem> itemCallback, Action<string, long, bool, double> processingCallback)
 		{
-			long itemIndex = 0;
+			long itemIndex = -1;
 			DateTime startUtc = DateTime.UtcNow;
 
 			if ((object)enumerable == null)
 				throw new ArgumentNullException(nameof(enumerable));
 
 			if ((object)processingCallback != null)
-				processingCallback(sourceLabel, -1, false, (DateTime.UtcNow - startUtc).TotalSeconds);
+				processingCallback(sourceLabel, itemIndex, false, (DateTime.UtcNow - startUtc).TotalSeconds);
 
 			foreach (TItem item in enumerable)
 			{

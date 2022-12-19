@@ -21,14 +21,14 @@ namespace WellEngineered.Siobhan.Middleware
 			Func<string, long, bool, double, CancellationToken, ValueTask> processingCallback,
 			[EnumeratorCancellation] CancellationToken cancellationToken = default)
 		{
-			long itemIndex = 0;
+			long itemIndex = -1;
 			DateTime startUtc = DateTime.UtcNow;
 
 			if ((object)asyncEnumerable == null)
 				throw new ArgumentNullException(nameof(asyncEnumerable));
 
 			if ((object)processingCallback != null)
-				await processingCallback(sourceLabel, -1, false, (DateTime.UtcNow - startUtc).TotalSeconds, cancellationToken);
+				await processingCallback(sourceLabel, itemIndex, false, (DateTime.UtcNow - startUtc).TotalSeconds, cancellationToken);
 
 			await foreach (TItem item in asyncEnumerable.WithCancellation(cancellationToken))
 			{
