@@ -5,16 +5,10 @@
 
 namespace WellEngineered.Siobhan.Textual.Lined
 {
-	public class LinedTextualFieldSpec
-		: TextualFieldSpec,
-			ILinedTextualFieldSpec
+	public enum NewLineStyle
 	{
-		#region Constructors/Destructors
-
-		public LinedTextualFieldSpec()
-		{
-		}
-
-		#endregion
+		Auto = 0,
+		Windows,
+		Unix
 	}
 }

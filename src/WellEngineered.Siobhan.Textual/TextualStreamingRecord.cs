@@ -12,32 +12,41 @@ namespace WellEngineered.Siobhan.Textual
 	{
 		#region Constructors/Destructors
 
-		public TextualStreamingRecord(long recordIndex, long lineNumber, long characterNumber)
+		public TextualStreamingRecord(long recordIndex, long lineNumber, long characterNumberStart, long characterNumberEnd)
 			: base(StringComparer.OrdinalIgnoreCase)
 		{
 			this.recordIndex = recordIndex;
 			this.lineNumber = lineNumber;
-			this.characterNumber = characterNumber;
+			this.characterNumberStart = characterNumberStart;
+			this.characterNumberEnd = characterNumberEnd;
 		}
 
 		#endregion
 
 		#region Fields/Constants
 
-		private readonly long characterNumber;
+		private readonly long characterNumberStart;
+		private readonly long characterNumberEnd;
 		private readonly long lineNumber;
-
 		private readonly long recordIndex;
 
 		#endregion
 
 		#region Properties/Indexers/Events
 
-		public long CharacterNumber
+		public long CharacterNumberStart
 		{
 			get
 			{
-				return this.characterNumber;
+				return this.characterNumberStart;
+			}
+		}
+		
+		public long CharacterNumberEnd
+		{
+			get
+			{
+				return this.characterNumberEnd;
 			}
 		}
 

@@ -5,6 +5,7 @@
 
 #if ASYNC_ALL_THE_WAY_DOWN
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,7 +35,7 @@ namespace WellEngineered.Siobhan.Textual
 
 			await Task.CompletedTask;
 		}
-
+		
 		protected abstract IAsyncLifecycleEnumerable<ITextualStreamingRecord> CoreReadFooterRecordsAsync(ILifecycleEnumerable<TTextualFieldSpec> footers, CancellationToken cancellationToken = default);
 
 		protected abstract IAsyncLifecycleEnumerable<TTextualFieldSpec> CoreReadHeaderFieldsAsync(CancellationToken cancellationToken = default);

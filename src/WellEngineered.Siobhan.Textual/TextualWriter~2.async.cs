@@ -77,8 +77,8 @@ namespace WellEngineered.Siobhan.Textual
 
 		public ValueTask WriteHeaderFieldsAsync(IAsyncLifecycleEnumerable<TTextualFieldSpec> headers, CancellationToken cancellationToken = default)
 		{
-			if ((object)headers == null)
-				throw new ArgumentNullException(nameof(headers));
+			//if ((object)headers == null)
+				//throw new ArgumentNullException(nameof(headers));
 
 			try
 			{

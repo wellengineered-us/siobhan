@@ -20,7 +20,6 @@ namespace WellEngineered.Siobhan.Textual
 		#region Fields/Constants
 
 		private string fieldFormat;
-
 		private long fieldOrdinal;
 		private string fieldTitle;
 		private TextualFieldType fieldType;

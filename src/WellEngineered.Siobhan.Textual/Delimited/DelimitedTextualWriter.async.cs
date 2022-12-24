@@ -30,7 +30,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 				throw new InvalidOperationException(string.Format("Header record (fields) has (have) alredy been written."));
 
 			// fields != null IF AND ONLY IF caller wishes to override DelimitedTextualSpec.DelimitedTextHeaderSpecs
-			headers = headers ?? GetFieldsAsync(this.TextualSpec.TextualHeaderSpecs, cancellationToken).ToAsyncLifecycleEnumerable();
+			headers = headers ?? GetFieldsAsync(this.TextualSpec.HeaderSpecs, cancellationToken).ToAsyncLifecycleEnumerable();
 
 			if ((object)headers != null &&
 				this.TextualSpec.IsFirstRecordHeader)
@@ -55,7 +55,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 					throw new ArgumentNullException(nameof(textualSpecTextualHeaderSpecs));
 
 				// do not async here
-				foreach (IDelimitedTextualFieldSpec textualSpecTextualHeaderSpec in this.TextualSpec.TextualHeaderSpecs)
+				foreach (IDelimitedTextualFieldSpec textualSpecTextualHeaderSpec in this.TextualSpec.HeaderSpecs)
 				{
 					yield return textualSpecTextualHeaderSpec;
 				}
@@ -69,7 +69,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 			if ((object)records == null)
 				throw new ArgumentNullException(nameof(records));
 
-			if (!this.HeaderRecordWritten)
+			if (!this.HeaderRecordWritten && this.TextualSpec.IsFirstRecordHeader)
 				await this.WriteHeaderFieldsAsync(null, cancellationToken); // force fields if not explicitly called in advance
 
 			long recordIndex = 0;

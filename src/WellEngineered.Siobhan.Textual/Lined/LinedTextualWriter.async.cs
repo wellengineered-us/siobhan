@@ -36,9 +36,6 @@ namespace WellEngineered.Siobhan.Textual.Lined
 			if ((object)records == null)
 				throw new ArgumentNullException(nameof(records));
 
-			if (!this.HeaderRecordWritten)
-				await this.CoreWriteHeaderFieldsAsync(null, cancellationToken); // force fields if not explicitly called in advance
-
 			long recordIndex = 0;
 			await foreach (ISiobhanPayload record in records.WithCancellation(cancellationToken))
 			{
@@ -54,8 +51,7 @@ namespace WellEngineered.Siobhan.Textual.Lined
 					fieldIndex++;
 				}
 
-				if (!string.IsNullOrEmpty(this.TextualSpec.RecordDelimiter))
-					await this.BaseTextWriter.WriteAsync(this.TextualSpec.RecordDelimiter);
+				await this.BaseTextWriter.WriteAsync(Environment.NewLine);
 
 				recordIndex++;
 			}

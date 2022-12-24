@@ -121,8 +121,8 @@ namespace WellEngineered.Siobhan.Textual
 
 		public void WriteHeaderFields(ILifecycleEnumerable<TTextualFieldSpec> headers)
 		{
-			if ((object)headers == null)
-				throw new ArgumentNullException(nameof(headers));
+			//if ((object)headers == null)
+				//throw new ArgumentNullException(nameof(headers));
 
 			try
 			{

@@ -17,6 +17,7 @@ namespace WellEngineered.Siobhan.Primitives.Configuration
 		#region Constructors/Destructors
 
 		public UnknownSiobhanConfiguration()
+			: this(new Dictionary<string, object>(), null)
 		{
 		}
 

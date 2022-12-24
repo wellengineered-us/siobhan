@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 using WellEngineered.Siobhan.Primitives;
 
@@ -20,25 +21,6 @@ namespace WellEngineered.Siobhan.Textual.Lined
 		public LinedTextualReader(TextReader baseTextReader, ILinedTextualSpec linedTextualSpec)
 			: base(baseTextReader, linedTextualSpec)
 		{
-			this.ResetParserState();
-		}
-
-		#endregion
-
-		#region Fields/Constants
-
-		private readonly _ParserState parserState = new _ParserState();
-
-		#endregion
-
-		#region Properties/Indexers/Events
-
-		private _ParserState ParserState
-		{
-			get
-			{
-				return this.parserState;
-			}
 		}
 
 		#endregion
@@ -51,10 +33,7 @@ namespace WellEngineered.Siobhan.Textual.Lined
 
 			IEnumerable<ITextualStreamingRecord> GetFooters()
 			{
-				foreach (ITextualStreamingRecord textualStreamingRecord in new ITextualStreamingRecord[] { })
-				{
-					yield return textualStreamingRecord;
-				}
+				yield break;
 			}
 		}
 
@@ -64,62 +43,122 @@ namespace WellEngineered.Siobhan.Textual.Lined
 
 			IEnumerable<ILinedTextualFieldSpec> GetHeaders()
 			{
-				foreach (ILinedTextualFieldSpec linedTextualFieldSpec in new ILinedTextualFieldSpec[] { })
-				{
-					yield return linedTextualFieldSpec;
-				}
+				yield break;
 			}
 		}
 
 		protected override ILifecycleEnumerable<ITextualStreamingRecord> CoreReadRecords()
 		{
-			return GetRecords().ToLifecycleEnumerable();
-
-			IEnumerable<ITextualStreamingRecord> GetRecords()
-			{
-				string line;
-				ITextualStreamingRecord record;
-
-				while (true)
-				{
-					line = this.BaseTextReader.ReadLine();
-
-					if (string.IsNullOrEmpty(line))
-						yield break;
-
-					// TODO fix counts
-					record = new TextualStreamingRecord(this.ParserState.lineIndex, this.ParserState.lineIndex, this.ParserState.characterIndex);
-					record.Add(string.Empty, line);
-
-					yield return record;
-				}
-			}
+			return this.ResumableParserMainLoop(false).ToLifecycleEnumerable();
 		}
 
-		private void ResetParserState()
+		private IEnumerable<ITextualStreamingRecord> ResumableParserMainLoop(bool yieldOnlyOnce)
 		{
-			const long DEFAULT_INDEX = 0;
+			const int EOF = -1;
+			const int DEFAULT_INDEX = -1;
+			string line;
+			
+			ITextualStreamingRecord record;
+			bool isEndOfFile = false;
+			long recordIndex = DEFAULT_INDEX;
+			long lineIndex = DEFAULT_INDEX;
+			long characterIndexStart = DEFAULT_INDEX;
+			long characterIndexEnd = DEFAULT_INDEX;
 
-			this.ParserState.record = new TextualStreamingRecord(0, 0, 0);
-			this.ParserState.characterIndex = DEFAULT_INDEX;
-			this.ParserState.lineIndex = DEFAULT_INDEX;
+			StringBuilder recordStringBuilder;
 
+			char previous = '\0';
+			
 			this.TextualSpec.AssertValid();
-		}
 
-		#endregion
+			recordStringBuilder = new StringBuilder();
+			
+			// main loop - character stream
+			while (!isEndOfFile)
+			{
+				int __value;
+				char current, next;
+				
+				// read the next byte
+				__value = this.BaseTextReader.Read();
+				current = (char)__value;
+				
+				// check for -1 (EOF)
+				if (__value == EOF)
+				{
+					// set terminal state
+					isEndOfFile = true;
+				}
+				
+				// peek the next byte
+				__value = this.BaseTextReader.Peek();
+				next = (char)__value;
 
-		#region Classes/Structs/Interfaces/Enums/Delegates
+				if (this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
+					this.TextualSpec.NewLineStyle == NewLineStyle.Windows)
+				{
+					// check parser state
+					if ((previous == '\r' && current == '\n'))
+					{
+						// eat this
+						continue;
+					}
+				}
 
-		private sealed class _ParserState
-		{
-			#region Fields/Constants
+				// check parser state
+				if (isEndOfFile ||
+					((this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
+						this.TextualSpec.NewLineStyle == NewLineStyle.Unix)
+						&& current == '\n') ||
+					((this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
+						this.TextualSpec.NewLineStyle == NewLineStyle.Windows) &&
+						current == '\r' && next == '\n'))
+				{
+					line = recordStringBuilder.ToString();
 
-			public long characterIndex;
-			public long lineIndex;
-			public ITextualStreamingRecord record;
+					// check for blank line (ignore)
+					if (line.Length != 0)
+					{
+						// advance the character index
+						characterIndexStart = characterIndexEnd + 1;
+						characterIndexEnd = characterIndexStart + (line.Length - 1) +
+											((this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
+												this.TextualSpec.NewLineStyle == NewLineStyle.Unix)
+												&& current == '\n' ? 1 : 
+												(this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
+													this.TextualSpec.NewLineStyle == NewLineStyle.Windows) && 
+													current == '\r' && next == '\n' ? 2 : 0);
 
-			#endregion
+						// advance record index
+						recordIndex++;
+
+						// advance line index
+						lineIndex++;
+
+						// create this yielding record; (indices are zero-based; numbers are one's based)
+						record = new TextualStreamingRecord(recordIndex, lineIndex + 1, characterIndexStart + 1, characterIndexEnd + 1);
+
+						// use default field name (key) and commit value to record
+						record.Add(string.Empty, line);
+
+						// ain't this some shhhhhhhh!t?
+						yield return record;
+					}
+
+					if (yieldOnlyOnce) // state-based resumption of loop ;)
+						break; // MUST NOT USE YIELD BREAK - as we will RESUME the enumeration based on state
+
+					// continue resumable parser loop upon next enumeration :>
+					
+					recordStringBuilder.Clear();
+				}
+				else
+				{
+					recordStringBuilder.Append(current);
+				}
+
+				previous = current;
+			}
 		}
 
 		#endregion

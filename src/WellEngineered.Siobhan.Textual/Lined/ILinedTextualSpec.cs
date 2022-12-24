@@ -8,5 +8,9 @@ namespace WellEngineered.Siobhan.Textual.Lined
 	public interface ILinedTextualSpec
 		: ITextualSpec<ILinedTextualFieldSpec>
 	{
+		NewLineStyle NewLineStyle
+		{
+			get;
+		}
 	}
 }

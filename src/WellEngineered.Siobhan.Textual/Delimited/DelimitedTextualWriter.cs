@@ -83,7 +83,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 				throw new InvalidOperationException(string.Format("Header record (fields) has (have) already been written."));
 
 			// fields != null IF AND ONLY IF caller wishes to override DelimitedTextualSpec.DelimitedTextHeaderSpecs
-			headers = headers ?? this.TextualSpec.TextualHeaderSpecs.ToLifecycleEnumerable();
+			headers = headers ?? this.TextualSpec.HeaderSpecs.ToLifecycleEnumerable();
 
 			if ((object)headers != null &&
 				this.TextualSpec.IsFirstRecordHeader)
@@ -108,7 +108,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 			if ((object)records == null)
 				throw new ArgumentNullException(nameof(records));
 
-			if (!this.HeaderRecordWritten)
+			if (!this.HeaderRecordWritten && this.TextualSpec.IsFirstRecordHeader)
 				this.WriteHeaderFields(null); // force fields if not explicitly called in advance
 
 			long recordIndex = 0;
@@ -139,8 +139,8 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 				throw new ArgumentNullException(nameof(fieldTitle));
 
 			// TODO: do not assume order is corrcetly aligned to index
-			if (fieldIndex < this.TextualSpec.TextualHeaderSpecs.Count)
-				header = this.TextualSpec.TextualHeaderSpecs[(int)fieldIndex];
+			if (fieldIndex < this.TextualSpec.HeaderSpecs.Count)
+				header = this.TextualSpec.HeaderSpecs[(int)fieldIndex];
 
 			safeFieldValue = fieldValue?.ToString() ?? string.Empty;
 

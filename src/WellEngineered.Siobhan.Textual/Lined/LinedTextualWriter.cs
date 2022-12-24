@@ -24,41 +24,6 @@ namespace WellEngineered.Siobhan.Textual.Lined
 
 		#endregion
 
-		#region Fields/Constants
-
-		private bool footerRecordWritten;
-		private bool headerRecordWritten;
-
-		#endregion
-
-		#region Properties/Indexers/Events
-
-		private bool FooterRecordWritten
-		{
-			get
-			{
-				return this.footerRecordWritten;
-			}
-			set
-			{
-				this.footerRecordWritten = value;
-			}
-		}
-
-		private bool HeaderRecordWritten
-		{
-			get
-			{
-				return this.headerRecordWritten;
-			}
-			set
-			{
-				this.headerRecordWritten = value;
-			}
-		}
-
-		#endregion
-
 		#region Methods/Operators
 
 		protected override void CoreWriteFooterRecords(ILifecycleEnumerable<ILinedTextualFieldSpec> footers, ILifecycleEnumerable<ITextualStreamingRecord> records)
@@ -76,9 +41,6 @@ namespace WellEngineered.Siobhan.Textual.Lined
 			if ((object)records == null)
 				throw new ArgumentNullException(nameof(records));
 
-			if (!this.HeaderRecordWritten)
-				this.CoreWriteHeaderFields(null); // force fields if not explicitly called in advance
-
 			long recordIndex = 0;
 			foreach (ISiobhanPayload record in records)
 			{
@@ -94,8 +56,23 @@ namespace WellEngineered.Siobhan.Textual.Lined
 					fieldIndex++;
 				}
 
-				if (!string.IsNullOrEmpty(this.TextualSpec.RecordDelimiter))
-					this.BaseTextWriter.Write(this.TextualSpec.RecordDelimiter);
+				string newline;
+				switch (this.TextualSpec.NewLineStyle)
+				{
+					case NewLineStyle.Auto:
+						newline = Environment.NewLine;
+						break;
+					case NewLineStyle.Windows:
+						newline = "\r\n";
+						break;
+					case NewLineStyle.Unix:
+						newline = "\n";
+						break;
+					default:
+						throw new ArgumentOutOfRangeException(this.TextualSpec.NewLineStyle.ToString());
+				}
+				
+				this.BaseTextWriter.Write(newline);
 
 				recordIndex++;
 			}

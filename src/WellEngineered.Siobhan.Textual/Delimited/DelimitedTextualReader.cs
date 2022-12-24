@@ -114,14 +114,14 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 
 				header = records.SingleOrDefault(); // force a single enumeration - yield return is a brain fyck
 
-				// sanity check - should never non-null record since it breaks (once==true)
+				// sanity check - should never non-null record since it breaks (yieldOnlyOnce==true)
 				if ((object)header != null)
 					throw new InvalidOperationException(string.Format("Delimited text reader parse state failure: yielded header record was not null."));
 
 				this.FixupHeaderRecord();
 			}
 
-			return this.TextualSpec.TextualHeaderSpecs.ToLifecycleEnumerable();
+			return this.TextualSpec.HeaderSpecs.ToLifecycleEnumerable();
 		}
 
 		protected override ILifecycleEnumerable<ITextualStreamingRecord> CoreReadRecords()
@@ -137,16 +137,16 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 			fieldNames = this.ParserState.Header.Keys.ToArray();
 
 			if ((object)this.TextualSpec == null ||
-				(object)this.TextualSpec.TextualHeaderSpecs == null ||
+				(object)this.TextualSpec.HeaderSpecs == null ||
 				(object)fieldNames == null)
 				throw new InvalidOperationException(string.Format(""));
 
 			// stash parsed field names into field specs member
-			if (fieldNames.Length == this.TextualSpec.TextualHeaderSpecs.Count)
+			if (fieldNames.Length == this.TextualSpec.HeaderSpecs.Count)
 			{
 				for (int fieldIndex = 0; fieldIndex < fieldNames.Length; fieldIndex++)
 				{
-					delimitedTextualFieldSpec = this.TextualSpec.TextualHeaderSpecs[fieldIndex];
+					delimitedTextualFieldSpec = this.TextualSpec.HeaderSpecs[fieldIndex];
 
 					if (!string.IsNullOrWhiteSpace(delimitedTextualFieldSpec.FieldTitle) &&
 						delimitedTextualFieldSpec.FieldTitle.ToLower() != fieldNames[fieldIndex].ToLower())
@@ -158,7 +158,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 			else
 			{
 				// reset field specs because they do not match in length
-				this.TextualSpec.TextualHeaderSpecs.Clear();
+				this.TextualSpec.HeaderSpecs.Clear();
 
 				for (long fieldIndex = 0; fieldIndex < fieldNames.Length; fieldIndex++)
 				{
@@ -172,7 +172,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 													FieldOrdinal = fieldIndex
 												};
 
-					this.TextualSpec.TextualHeaderSpecs.Add(delimitedTextualFieldSpec);
+					this.TextualSpec.HeaderSpecs.Add(delimitedTextualFieldSpec);
 				}
 			}
 		}
@@ -220,7 +220,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 					IDelimitedTextualFieldSpec delimitedTextualFieldSpec;
 					IDelimitedTextualFieldSpec[] delimitedTextualFieldSpecs;
 
-					delimitedTextualFieldSpecs = this.TextualSpec.TextualHeaderSpecs.ToArray();
+					delimitedTextualFieldSpecs = this.TextualSpec.HeaderSpecs.ToArray();
 
 					// check field array and field index validity
 					if ((object)delimitedTextualFieldSpecs == null ||
@@ -325,7 +325,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 		{
 			const long DEFAULT_INDEX = 0;
 
-			this.ParserState.Record = new TextualStreamingRecord(0, 0, 0);
+			this.ParserState.Record = new TextualStreamingRecord(0, 0, 0, 0);
 			this.ParserState.transientStringBuilder = new StringBuilder();
 			this.ParserState.readCurrentCharacter = '\0';
 			this.ParserState.peekNextCharacter = '\0';
@@ -340,7 +340,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 			this.TextualSpec.AssertValid();
 		}
 
-		private IEnumerable<ITextualStreamingRecord> ResumableParserMainLoop(bool once)
+		private IEnumerable<ITextualStreamingRecord> ResumableParserMainLoop(bool yieldOnlyOnce)
 		{
 			int __value;
 			char ch;
@@ -386,14 +386,20 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 					if ((object)this.ParserState.Record != null)
 					{
 						// should never yield the header record
-						if (!this.ParserState.isHeaderRecord)
+						if (!this.ParserState.isHeaderRecord && !this.ParserState.isFooterRecord)
 						{
 							// aint this some shhhhhhhh!t?
 							yield return this.ParserState.Record;
 						}
-						else
+						else if (this.ParserState.isHeaderRecord)
 						{
 							this.ParserState.Header = this.ParserState.Record; // cache elsewhere
+							this.ParserState.Record = null; // pretend it was a blank line
+							//this.ParserState.recordIndex--; // adjust down to zero
+						}
+						else if (this.ParserState.isFooterRecord)
+						{
+							this.ParserState.Footer = this.ParserState.Record; // cache elsewhere
 							this.ParserState.Record = null; // pretend it was a blank line
 							//this.ParserState.recordIndex--; // adjust down to zero
 						}
@@ -404,9 +410,9 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 						throw new InvalidOperationException(string.Format("Delimited text reader parse state failure: zero record index unexpected."));
 
 					// create a new record for the next index; will be used later
-					this.ParserState.Record = new TextualStreamingRecord(this.ParserState.recordIndex, this.ParserState.contentIndex, this.ParserState.characterIndex);
+					this.ParserState.Record = new TextualStreamingRecord(this.ParserState.recordIndex, this.ParserState.contentIndex, this.ParserState.characterIndex, -1);
 
-					if (once) // state-based resumption of loop ;)
+					if (yieldOnlyOnce) // state-based resumption of loop ;)
 						break; // MUST NOT USE YIELD BREAK - as we will RESUME the enumeration based on state
 				}
 			}
@@ -434,6 +440,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 			public long recordIndex;
 			public StringBuilder transientStringBuilder;
 			public long valueIndex;
+			private ITextualStreamingRecord footer;
 
 			#endregion
 
@@ -460,6 +467,18 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 				set
 				{
 					this.record = value;
+				}
+			}
+
+			public ITextualStreamingRecord Footer
+			{
+				get
+				{
+					return this.footer;
+				}
+				set
+				{
+					this.footer = value;
 				}
 			}
 

@@ -14,45 +14,30 @@ namespace WellEngineered.Siobhan.Textual
 		#region Constructors/Destructors
 
 		protected TextualSpec()
-			: this(new List<TTextualFieldSpec>(), new List<TTextualFieldSpec>())
+			: this(new List<TTextualFieldSpec>())
 		{
 		}
 
-		protected TextualSpec(IList<TTextualFieldSpec> textualHeaderSpecs, IList<TTextualFieldSpec> textualFooterSpecs)
+		protected TextualSpec(IList<TTextualFieldSpec> textualHeaderSpecs)
 		{
 			if ((object)textualHeaderSpecs == null)
 				throw new ArgumentNullException(nameof(textualHeaderSpecs));
 
-			if ((object)textualFooterSpecs == null)
-				throw new ArgumentNullException(nameof(textualFooterSpecs));
-
 			this.textualHeaderSpecs = textualHeaderSpecs;
-			this.textualFooterSpecs = textualFooterSpecs;
 		}
 
 		#endregion
 
 		#region Fields/Constants
 
-		private readonly IList<TTextualFieldSpec> textualFooterSpecs;
 		private readonly IList<TTextualFieldSpec> textualHeaderSpecs;
-		private bool isFirstRecordHeader;
-		private bool isLastRecordFooter;
-		private string recordDelimiter;
+		private string contentEncoding;
 
 		#endregion
 
 		#region Properties/Indexers/Events
 
-		public IList<TTextualFieldSpec> TextualFooterSpecs
-		{
-			get
-			{
-				return this.textualFooterSpecs;
-			}
-		}
-
-		public IList<TTextualFieldSpec> TextualHeaderSpecs
+		public IList<TTextualFieldSpec> HeaderSpecs
 		{
 			get
 			{
@@ -60,39 +45,15 @@ namespace WellEngineered.Siobhan.Textual
 			}
 		}
 
-		public bool IsFirstRecordHeader
+		public string ContentEncoding
 		{
 			get
 			{
-				return this.isFirstRecordHeader;
+				return this.contentEncoding;
 			}
 			set
 			{
-				this.isFirstRecordHeader = value;
-			}
-		}
-
-		public bool IsLastRecordFooter
-		{
-			get
-			{
-				return this.isLastRecordFooter;
-			}
-			set
-			{
-				this.isLastRecordFooter = value;
-			}
-		}
-
-		public virtual string RecordDelimiter
-		{
-			get
-			{
-				return this.recordDelimiter;
-			}
-			set
-			{
-				this.recordDelimiter = value;
+				this.contentEncoding = value;
 			}
 		}
 
@@ -102,7 +63,7 @@ namespace WellEngineered.Siobhan.Textual
 
 		public virtual void AssertValid()
 		{
-			// TODO
+			// do nothing
 		}
 
 		#endregion

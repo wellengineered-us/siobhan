@@ -11,7 +11,12 @@ namespace WellEngineered.Siobhan.Textual
 	{
 		#region Properties/Indexers/Events
 
-		long CharacterNumber
+		long CharacterNumberStart
+		{
+			get;
+		}
+		
+		long CharacterNumberEnd
 		{
 			get;
 		}

@@ -10,35 +10,16 @@ namespace WellEngineered.Siobhan.Textual
 	public interface ITextualSpec<TTextualFieldSpec>
 		where TTextualFieldSpec : ITextualFieldSpec
 	{
-		#region Properties/Indexers/Events
-
-		bool IsFirstRecordHeader
+		string ContentEncoding
 		{
 			get;
 		}
 
-		bool IsLastRecordFooter
+		IList<TTextualFieldSpec> HeaderSpecs
 		{
 			get;
 		}
-
-		string RecordDelimiter
-		{
-			get;
-		}
-
-		IList<TTextualFieldSpec> TextualFooterSpecs
-		{
-			get;
-		}
-
-		IList<TTextualFieldSpec> TextualHeaderSpecs
-		{
-			get;
-		}
-
-		#endregion
-
+		
 		#region Methods/Operators
 
 		void AssertValid();

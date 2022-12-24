@@ -26,10 +26,50 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 		private string closeQuoteValue;
 		private string fieldDelimiter;
 		private string openQuoteValue;
+		private bool isFirstRecordHeader;
+		private string recordDelimiter;
+		private string contentEncoding;
+		private int skipInitialRecordCount;
 
 		#endregion
 
 		#region Properties/Indexers/Events
+		
+		public int SkipInitialRecordCount
+		{
+			get
+			{
+				return this.skipInitialRecordCount;
+			}
+			set
+			{
+				this.skipInitialRecordCount = value;
+			}
+		}
+
+		public bool IsFirstRecordHeader
+		{
+			get
+			{
+				return this.isFirstRecordHeader;
+			}
+			set
+			{
+				this.isFirstRecordHeader = value;
+			}
+		}
+
+		public virtual string RecordDelimiter
+		{
+			get
+			{
+				return this.recordDelimiter;
+			}
+			set
+			{
+				this.recordDelimiter = value;
+			}
+		}
 
 		public string CloseQuoteValue
 		{

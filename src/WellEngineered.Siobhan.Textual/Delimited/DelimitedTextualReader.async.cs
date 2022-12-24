@@ -61,7 +61,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 				}
 
 				// do not async here
-				foreach (IDelimitedTextualFieldSpec textualSpecTextualHeaderSpec in this.TextualSpec.TextualHeaderSpecs)
+				foreach (IDelimitedTextualFieldSpec textualSpecTextualHeaderSpec in this.TextualSpec.HeaderSpecs)
 				{
 					yield return textualSpecTextualHeaderSpec;
 				}
@@ -123,14 +123,20 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 					if ((object)this.ParserState.Record != null)
 					{
 						// should never yield the header record
-						if (!this.ParserState.isHeaderRecord)
+						if (!this.ParserState.isHeaderRecord && !this.ParserState.isFooterRecord)
 						{
 							// aint this some shhhhhhhh!t?
 							yield return this.ParserState.Record;
 						}
-						else
+						else if (this.ParserState.isHeaderRecord)
 						{
 							this.ParserState.Header = this.ParserState.Record; // cache elsewhere
+							this.ParserState.Record = null; // pretend it was a blank line
+							//this.ParserState.recordIndex--; // adjust down to zero
+						}
+						else if (this.ParserState.isFooterRecord)
+						{
+							this.ParserState.Footer = this.ParserState.Record; // cache elsewhere
 							this.ParserState.Record = null; // pretend it was a blank line
 							//this.ParserState.recordIndex--; // adjust down to zero
 						}
@@ -141,7 +147,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 						throw new InvalidOperationException(string.Format("Delimited text reader parse state failure: zero record index unexpected."));
 
 					// create a new record for the next index; will be used later
-					this.ParserState.Record = new TextualStreamingRecord(this.ParserState.recordIndex, this.ParserState.contentIndex, this.ParserState.characterIndex);
+					this.ParserState.Record = new TextualStreamingRecord(this.ParserState.recordIndex, this.ParserState.contentIndex, this.ParserState.characterIndex, 0);
 
 					if (once) // state-based resumption of loop ;)
 						break; // MUST NOT USE YIELD BREAK - as we will RESUME the enumeration based on state

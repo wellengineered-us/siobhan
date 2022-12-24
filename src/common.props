@@ -5,12 +5,18 @@
 <Project>
 	<PropertyGroup>
 		<LangVersion>latest</LangVersion>
-		<DebugType>portable</DebugType>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\Siobhan.snk</AssemblyOriginatorKeyFile>
 		<DefineConstants>ASYNC_ALL_THE_WAY_DOWN;ASYNC_MAIN_ENTRY_POINT</DefineConstants>
+		<!--<DebugType>portable</DebugType>-->
+		<DebugType>embedded</DebugType>
+		<!--<IncludeSymbols>true</IncludeSymbols>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+    	<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>-->
 	</PropertyGroup>
-
+	
 	<PropertyGroup>
 		<WeSolderPackageVersion>0.9.0</WeSolderPackageVersion>
 	</PropertyGroup>
