@@ -19,11 +19,6 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 	{
 		#region Methods/Operators
 
-		protected override ValueTask CoreWriteFooterRecordsAsync(IAsyncLifecycleEnumerable<IDelimitedTextualFieldSpec> specs, IAsyncLifecycleEnumerable<ITextualStreamingRecord> footers, CancellationToken cancellationToken = default)
-		{
-			throw new NotSupportedException(string.Format("Cannot write footer records (via fields) in this version."));
-		}
-
 		protected override async ValueTask CoreWriteHeaderFieldsAsync(IAsyncLifecycleEnumerable<IDelimitedTextualFieldSpec> headers, CancellationToken cancellationToken = default)
 		{
 			if (this.HeaderRecordWritten)
@@ -43,8 +38,8 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 					fieldIndex++;
 				}
 
-				if (!string.IsNullOrEmpty(this.TextualSpec.RecordDelimiter))
-					await this.BaseTextWriter.WriteAsync(this.TextualSpec.RecordDelimiter);
+				string newline = !string.IsNullOrEmpty(this.TextualSpec.RecordDelimiter) ? this.TextualSpec.RecordDelimiter : Environment.NewLine;
+				await this.BaseTextWriter.WriteAsync(newline);
 
 				this.HeaderRecordWritten = true;
 			}
@@ -83,8 +78,8 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 					fieldIndex++;
 				}
 
-				if (!string.IsNullOrEmpty(this.TextualSpec.RecordDelimiter))
-					await this.BaseTextWriter.WriteAsync(this.TextualSpec.RecordDelimiter);
+				string newline = !string.IsNullOrEmpty(this.TextualSpec.RecordDelimiter) ? this.TextualSpec.RecordDelimiter : Environment.NewLine;
+				await this.BaseTextWriter.WriteAsync(newline);
 
 				recordIndex++;
 			}
@@ -92,8 +87,9 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 
 		private async Task WriteFieldAsync(bool firstFieldInRecord, string fieldValue, CancellationToken cancellationToken)
 		{
-			if (!firstFieldInRecord && !string.IsNullOrEmpty(this.TextualSpec.FieldDelimiter))
-				await this.BaseTextWriter.WriteAsync(this.TextualSpec.FieldDelimiter);
+			string comma = !string.IsNullOrEmpty(this.TextualSpec.FieldDelimiter) ? this.TextualSpec.FieldDelimiter : ",";
+			if (!firstFieldInRecord)
+				await this.BaseTextWriter.WriteAsync(comma);
 
 			if (!string.IsNullOrEmpty(this.TextualSpec.OpenQuoteValue))
 				await this.BaseTextWriter.WriteAsync(this.TextualSpec.OpenQuoteValue);

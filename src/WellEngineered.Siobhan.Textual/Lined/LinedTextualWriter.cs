@@ -26,11 +26,6 @@ namespace WellEngineered.Siobhan.Textual.Lined
 
 		#region Methods/Operators
 
-		protected override void CoreWriteFooterRecords(ILifecycleEnumerable<ILinedTextualFieldSpec> footers, ILifecycleEnumerable<ITextualStreamingRecord> records)
-		{
-			// do nothing
-		}
-
 		protected override void CoreWriteHeaderFields(ILifecycleEnumerable<ILinedTextualFieldSpec> headers)
 		{
 			// do nothing

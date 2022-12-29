@@ -34,8 +34,6 @@ namespace WellEngineered.Siobhan.Textual
 
 		void Flush();
 
-		void WriteFooterRecords(ILifecycleEnumerable<TTextualFieldSpec> specs, ILifecycleEnumerable<ITextualStreamingRecord> footers);
-
 		void WriteHeaderFields(ILifecycleEnumerable<TTextualFieldSpec> specs);
 
 		void WriteRecords(ILifecycleEnumerable<ISiobhanPayload /* SHOULD BE LCD INTERFACE */> records);

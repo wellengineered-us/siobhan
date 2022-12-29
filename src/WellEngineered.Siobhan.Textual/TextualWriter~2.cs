@@ -83,8 +83,6 @@ namespace WellEngineered.Siobhan.Textual
 			this.BaseTextWriter.Flush();
 		}
 
-		protected abstract void CoreWriteFooterRecords(ILifecycleEnumerable<TTextualFieldSpec> footers, ILifecycleEnumerable<ITextualStreamingRecord> records);
-
 		protected abstract void CoreWriteHeaderFields(ILifecycleEnumerable<TTextualFieldSpec> headers);
 
 		protected abstract void CoreWriteRecords(ILifecycleEnumerable<ISiobhanPayload> records);
@@ -94,24 +92,6 @@ namespace WellEngineered.Siobhan.Textual
 			try
 			{
 				this.CoreFlush();
-			}
-			catch (Exception ex)
-			{
-				throw new SiobhanException(string.Format("The textual writer failed (see inner exception)."), ex);
-			}
-		}
-
-		public void WriteFooterRecords(ILifecycleEnumerable<TTextualFieldSpec> footers, ILifecycleEnumerable<ITextualStreamingRecord> records)
-		{
-			if ((object)footers == null)
-				throw new ArgumentNullException(nameof(footers));
-
-			if ((object)records == null)
-				throw new ArgumentNullException(nameof(records));
-
-			try
-			{
-				this.CoreWriteFooterRecords(footers, records);
 			}
 			catch (Exception ex)
 			{

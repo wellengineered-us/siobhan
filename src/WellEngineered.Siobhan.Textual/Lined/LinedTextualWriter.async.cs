@@ -19,12 +19,6 @@ namespace WellEngineered.Siobhan.Textual.Lined
 	{
 		#region Methods/Operators
 
-		protected override ValueTask CoreWriteFooterRecordsAsync(IAsyncLifecycleEnumerable<ILinedTextualFieldSpec> specs, IAsyncLifecycleEnumerable<ITextualStreamingRecord> footers, CancellationToken cancellationToken = default)
-		{
-			// do nothing
-			return default;
-		}
-
 		protected override ValueTask CoreWriteHeaderFieldsAsync(IAsyncLifecycleEnumerable<ILinedTextualFieldSpec> headers, CancellationToken cancellationToken = default)
 		{
 			// do nothing

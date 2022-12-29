@@ -5,7 +5,8 @@
 
 namespace WellEngineered.Siobhan.Textual.Segmented
 {
-	public interface ISegmentedTextualFieldSpec : ITextualFieldSpec
+	public interface ISegmentedTextualFieldSpec
+		: ITextualFieldSpec
 	{
 	}
 }

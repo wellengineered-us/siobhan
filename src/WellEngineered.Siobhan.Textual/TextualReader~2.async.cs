@@ -35,27 +35,10 @@ namespace WellEngineered.Siobhan.Textual
 
 			await Task.CompletedTask;
 		}
-		
-		protected abstract IAsyncLifecycleEnumerable<ITextualStreamingRecord> CoreReadFooterRecordsAsync(ILifecycleEnumerable<TTextualFieldSpec> footers, CancellationToken cancellationToken = default);
 
 		protected abstract IAsyncLifecycleEnumerable<TTextualFieldSpec> CoreReadHeaderFieldsAsync(CancellationToken cancellationToken = default);
 
 		protected abstract IAsyncLifecycleEnumerable<ITextualStreamingRecord> CoreReadRecordsAsync(CancellationToken cancellationToken = default);
-
-		public IAsyncLifecycleEnumerable<ITextualStreamingRecord> ReadFooterRecordsAsync(ILifecycleEnumerable<TTextualFieldSpec> footers, CancellationToken cancellationToken = default)
-		{
-			if ((object)footers == null)
-				throw new ArgumentNullException(nameof(footers));
-
-			try
-			{
-				return this.CoreReadFooterRecordsAsync(footers, cancellationToken);
-			}
-			catch (Exception ex)
-			{
-				throw new SiobhanException(string.Format("The textual reader failed (see inner exception)."), ex);
-			}
-		}
 
 		public IAsyncLifecycleEnumerable<TTextualFieldSpec> ReadHeaderFieldsAsync(CancellationToken cancellationToken = default)
 		{

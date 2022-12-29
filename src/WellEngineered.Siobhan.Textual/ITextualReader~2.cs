@@ -30,8 +30,6 @@ namespace WellEngineered.Siobhan.Textual
 
 		#region Methods/Operators
 
-		ILifecycleEnumerable<ITextualStreamingRecord> ReadFooterRecords(ILifecycleEnumerable<TTextualFieldSpec> footers);
-
 		ILifecycleEnumerable<TTextualFieldSpec> ReadHeaderFields();
 
 		ILifecycleEnumerable<ITextualStreamingRecord> ReadRecords();

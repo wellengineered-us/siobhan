@@ -18,8 +18,6 @@ namespace WellEngineered.Siobhan.Textual
 	{
 		#region Methods/Operators
 
-		IAsyncLifecycleEnumerable<ITextualStreamingRecord> ReadFooterRecordsAsync(ILifecycleEnumerable<TTextualFieldSpec> footers, CancellationToken cancellationToken = default);
-
 		IAsyncLifecycleEnumerable<TTextualFieldSpec> ReadHeaderFieldsAsync(CancellationToken cancellationToken = default);
 
 		IAsyncLifecycleEnumerable<ITextualStreamingRecord> ReadRecordsAsync(CancellationToken cancellationToken = default);

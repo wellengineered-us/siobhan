@@ -24,12 +24,23 @@ namespace WellEngineered.Siobhan.IntegrationTests.Cli.Textual.@_
 		#region Methods/Operators
 
 		[Test]
-		public async ValueTask ShouldParseSampleLinedFileTestAsync()
+		public async ValueTask ShouldParseSampleLinedFileAsciiEncodingUnixEolTestAsync()
 		{
-			string textualFilePath = @"d:\SupplierData.csv";
+			await ParseSampleLinedFileTestAsync(@"d:\testdata.small.ascii.unix.csv", "us-ascii", NewLineStyle.Unix);
+		}
+		
+		[Test]
+		public async ValueTask ShouldParseSampleLinedFileAsciiEncodingWindowsEolTestAsync()
+		{
+			await ParseSampleLinedFileTestAsync(@"d:\testdata.small.ascii.windows.csv", "us-ascii", NewLineStyle.Windows);
+		}
+		
+		private async ValueTask ParseSampleLinedFileTestAsync(string textualFilePath, string contentEncoding, NewLineStyle newLineStyle)
+		{
 			LinedTextualSpec delimitedTextualSpec = new LinedTextualSpec()
 													{
-														ContentEncoding = "us-ascii"
+														ContentEncoding = contentEncoding,
+														NewLineStyle = newLineStyle
 													};
 			
 			using (StreamReader streamReader = new StreamReader(File.Open(textualFilePath, FileMode.Open, FileAccess.Read, FileShare.Read), Encoding.GetEncoding(delimitedTextualSpec.ContentEncoding)))
@@ -43,7 +54,7 @@ namespace WellEngineered.Siobhan.IntegrationTests.Cli.Textual.@_
 
 					await foreach (var record in textualReader.ReadRecordsAsync())
 					{
-						await Console.Out.WriteLineAsync(string.Format("cns={0:000000000}, cne={1:000000000}, ln={2:000000000}, ri={3:000000000}", record.CharacterNumberStart, record.CharacterNumberEnd, record.LineNumber, record.RecordIndex));
+						await Console.Out.WriteLineAsync(string.Format("cns={0:000000000}, cne={1:000000000}, ln={2:000000000}, ri={3:000000000}\t{4}", record.CharacterNumberStart, record.CharacterNumberEnd, record.LineNumber, record.RecordIndex, record[string.Empty]));
 					}
 				}
 			}
@@ -71,7 +82,7 @@ namespace WellEngineered.Siobhan.IntegrationTests.Cli.Textual.@_
 
 					await foreach (var record in textualReader.ReadRecordsAsync())
 					{
-						await Console.Out.WriteLineAsync(string.Format("cns={0:000000000}, cne={1:000000000}, ln={2:000000000}, ri={3:000000000}", record.CharacterNumberStart, record.CharacterNumberEnd, record.LineNumber, record.RecordIndex));
+						await Console.Out.WriteLineAsync(string.Format("cns={0:000000000}, cne={1:000000000}, ln={2:000000000}, ri={3:000000000}\t{4}", record.CharacterNumberStart, record.CharacterNumberEnd, record.LineNumber, record.RecordIndex, record[string.Empty]));
 					}
 				}
 			}

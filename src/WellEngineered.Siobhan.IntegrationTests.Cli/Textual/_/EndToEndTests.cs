@@ -30,14 +30,24 @@ namespace WellEngineered.Siobhan.IntegrationTests.Cli.Textual.@_
 		#region Methods/Operators
 		
 		[Test]
-		public void ShouldParseSampleLinedFileTest()
+		public void ShouldParseSampleLinedFileAsciiEncodingUnixEolTest()
 		{
-			string textualFilePath = @"d:\SupplierData.csv";
+			ParseSampleLinedFileTest(@"d:\testdata.small.ascii.unix.csv", "us-ascii", NewLineStyle.Unix);
+		}
+		
+		[Test]
+		public void ShouldParseSampleLinedFileAsciiEncodingWindowsEolTest()
+		{
+			ParseSampleLinedFileTest(@"d:\testdata.small.ascii.windows.csv", "us-ascii", NewLineStyle.Windows);
+		}
+		
+		private void ParseSampleLinedFileTest(string textualFilePath, string contentEncoding, NewLineStyle newLineStyle)
+		{
 			LinedTextualSpec delimitedTextualSpec = new LinedTextualSpec()
-														{
-															ContentEncoding = "us-ascii",
-															NewLineStyle = NewLineStyle.Auto
-														};
+													{
+														ContentEncoding = contentEncoding,
+														NewLineStyle = newLineStyle
+													};
 			
 			using (StreamReader streamReader = new StreamReader(File.Open(textualFilePath, FileMode.Open, FileAccess.Read, FileShare.Read), Encoding.GetEncoding(delimitedTextualSpec.ContentEncoding)))
 			{

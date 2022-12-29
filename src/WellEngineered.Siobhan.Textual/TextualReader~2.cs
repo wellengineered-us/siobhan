@@ -78,26 +78,9 @@ namespace WellEngineered.Siobhan.Textual
 				this.BaseTextReader.Dispose();
 		}
 
-		protected abstract ILifecycleEnumerable<ITextualStreamingRecord> CoreReadFooterRecords(ILifecycleEnumerable<TTextualFieldSpec> footers);
-
 		protected abstract ILifecycleEnumerable<TTextualFieldSpec> CoreReadHeaderFields();
 
 		protected abstract ILifecycleEnumerable<ITextualStreamingRecord> CoreReadRecords();
-
-		public ILifecycleEnumerable<ITextualStreamingRecord> ReadFooterRecords(ILifecycleEnumerable<TTextualFieldSpec> footers)
-		{
-			if ((object)footers == null)
-				throw new ArgumentNullException(nameof(footers));
-
-			try
-			{
-				return this.CoreReadFooterRecords(footers);
-			}
-			catch (Exception ex)
-			{
-				throw new SiobhanException(string.Format("The textual reader failed (see inner exception)."), ex);
-			}
-		}
 
 		public ILifecycleEnumerable<TTextualFieldSpec> ReadHeaderFields()
 		{

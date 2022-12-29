@@ -21,21 +21,6 @@ namespace WellEngineered.Siobhan.Textual.Lined
 	{
 		#region Methods/Operators
 
-		protected override IAsyncLifecycleEnumerable<ITextualStreamingRecord> CoreReadFooterRecordsAsync(ILifecycleEnumerable<ILinedTextualFieldSpec> footers, CancellationToken cancellationToken = default)
-		{
-			return GetFootersAsync(cancellationToken).ToAsyncLifecycleEnumerable();
-
-			async IAsyncEnumerable<ITextualStreamingRecord> GetFootersAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
-			{
-				foreach (ITextualStreamingRecord textualStreamingRecord in new ITextualStreamingRecord[] { })
-				{
-					yield return textualStreamingRecord;
-				}
-
-				await Task.CompletedTask;
-			}
-		}
-
 		protected override IAsyncLifecycleEnumerable<ILinedTextualFieldSpec> CoreReadHeaderFieldsAsync(CancellationToken cancellationToken = default)
 		{
 			return GetHeadersAsync(cancellationToken).ToAsyncLifecycleEnumerable();
@@ -58,6 +43,13 @@ namespace WellEngineered.Siobhan.Textual.Lined
 		
 		private async IAsyncEnumerable<ITextualStreamingRecord> ResumableParserMainLoopAsync(bool yieldOnlyOnce, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 		{
+			const char EOL_UNIX = '\n';
+			const char EOL_WIN_A = '\r';
+			const char EOL_WIN_B = '\n';
+			
+			const string EOL_UNIX_STR = "\n";
+			const string EOL_WIN_STR = "\r\n";
+			
 			const int EOF = 0; // ReadAsync() ONLY
 			const int DEFAULT_INDEX = -1;
 			string line;
@@ -71,47 +63,42 @@ namespace WellEngineered.Siobhan.Textual.Lined
 
 			StringBuilder recordStringBuilder;
 
+			int readsz, buffer;
+			char current, next;
+			Memory<char> memory;
 			char previous = '\0';
+			
+			// [value] [newline(\n|\r\n)] | [eof]
 			
 			this.TextualSpec.AssertValid();
 
 			recordStringBuilder = new StringBuilder();
-
-			//await Task.CompletedTask;
 			
 			// main loop - character stream
 			while (!isEndOfFile)
 			{
-				int __value;
-				char current, next;
-				
-				Memory<char> memory;
-				
 				memory = new Memory<char>(new char[1]);
 				
 				// read the next byte
-				//__value = this.BaseTextReader.Read();
-				//current = (char)__value;
+				readsz = await this.BaseTextReader.ReadAsync(memory, cancellationToken);
+				current = memory.Length == 1 && readsz == 1 ? memory.Span[0] : '\0';
 				
-				__value = await this.BaseTextReader.ReadAsync(memory, cancellationToken);
-				current = memory.Length == 1 && __value == 1 ? memory.Span[0] : '\0';
-				
-				// check for -1 (EOF)
-				if (__value == EOF)
+				// check for 0 size (EOF)
+				if (readsz == EOF)
 				{
 					// set terminal state
 					isEndOfFile = true;
 				}
 				
 				// peek the next byte
-				__value = this.BaseTextReader.Peek(); // NO ASYNC SUPPORT
-				next = (char)__value;
+				buffer = this.BaseTextReader.Peek(); // NO ASYNC SUPPORT
+				next = (char)buffer;
 
-				if (this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
+				if ((this.TextualSpec.NewLineStyle == NewLineStyle.Auto && Environment.NewLine == EOL_WIN_STR) ||
 					this.TextualSpec.NewLineStyle == NewLineStyle.Windows)
 				{
 					// check parser state
-					if ((previous == '\r' && current == '\n'))
+					if (previous == EOL_WIN_A && current == EOL_WIN_B)
 					{
 						// eat this
 						continue;
@@ -120,12 +107,12 @@ namespace WellEngineered.Siobhan.Textual.Lined
 
 				// check parser state
 				if (isEndOfFile ||
-					((this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
+					(((this.TextualSpec.NewLineStyle == NewLineStyle.Auto && Environment.NewLine == EOL_UNIX_STR) ||
 					this.TextualSpec.NewLineStyle == NewLineStyle.Unix)
-					&& current == '\n') ||
-					((this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
+					&& current == EOL_UNIX) ||
+					(((this.TextualSpec.NewLineStyle == NewLineStyle.Auto && Environment.NewLine == EOL_WIN_STR) ||
 					this.TextualSpec.NewLineStyle == NewLineStyle.Windows) &&
-					current == '\r' && next == '\n'))
+					current == EOL_WIN_A && next == EOL_WIN_B))
 				{
 					line = recordStringBuilder.ToString();
 
@@ -135,12 +122,12 @@ namespace WellEngineered.Siobhan.Textual.Lined
 						// advance the character index
 						characterIndexStart = characterIndexEnd + 1;
 						characterIndexEnd = characterIndexStart + (line.Length - 1) +
-											((this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
+											(((this.TextualSpec.NewLineStyle == NewLineStyle.Auto && Environment.NewLine == EOL_UNIX_STR) ||
 											this.TextualSpec.NewLineStyle == NewLineStyle.Unix)
-											&& current == '\n' ? 1 : 
-												(this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
+											&& current == EOL_UNIX ? 1 : 
+												((this.TextualSpec.NewLineStyle == NewLineStyle.Auto && Environment.NewLine == EOL_WIN_STR) ||
 												this.TextualSpec.NewLineStyle == NewLineStyle.Windows) && 
-												current == '\r' && next == '\n' ? 2 : 0);
+												current == EOL_WIN_A && next == EOL_WIN_B ? 2 : 0);
 
 						// advance record index
 						recordIndex++;

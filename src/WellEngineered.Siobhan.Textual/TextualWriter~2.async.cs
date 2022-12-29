@@ -39,8 +39,6 @@ namespace WellEngineered.Siobhan.Textual
 			await this.BaseTextWriter.FlushAsync();
 		}
 
-		protected abstract ValueTask CoreWriteFooterRecordsAsync(IAsyncLifecycleEnumerable<TTextualFieldSpec> specs, IAsyncLifecycleEnumerable<ITextualStreamingRecord> footers, CancellationToken cancellationToken = default);
-
 		protected abstract ValueTask CoreWriteHeaderFieldsAsync(IAsyncLifecycleEnumerable<TTextualFieldSpec> headers, CancellationToken cancellationToken = default);
 
 		protected abstract ValueTask CoreWriteRecordsAsync(IAsyncLifecycleEnumerable<ISiobhanPayload> records, CancellationToken cancellationToken = default);
@@ -50,24 +48,6 @@ namespace WellEngineered.Siobhan.Textual
 			try
 			{
 				return this.CoreFlushAsync(cancellationToken);
-			}
-			catch (Exception ex)
-			{
-				throw new SiobhanException(string.Format("The textual writer failed (see inner exception)."), ex);
-			}
-		}
-
-		public ValueTask WriteFooterRecordsAsync(IAsyncLifecycleEnumerable<TTextualFieldSpec> specs, IAsyncLifecycleEnumerable<ITextualStreamingRecord> footers, CancellationToken cancellationToken = default)
-		{
-			if ((object)specs == null)
-				throw new ArgumentNullException(nameof(specs));
-
-			if ((object)footers == null)
-				throw new ArgumentNullException(nameof(footers));
-
-			try
-			{
-				return this.CoreWriteFooterRecordsAsync(specs, footers, cancellationToken);
 			}
 			catch (Exception ex)
 			{

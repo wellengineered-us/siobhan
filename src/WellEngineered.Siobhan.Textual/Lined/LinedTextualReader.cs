@@ -27,16 +27,6 @@ namespace WellEngineered.Siobhan.Textual.Lined
 
 		#region Methods/Operators
 
-		protected override ILifecycleEnumerable<ITextualStreamingRecord> CoreReadFooterRecords(ILifecycleEnumerable<ILinedTextualFieldSpec> footers)
-		{
-			return GetFooters().ToLifecycleEnumerable();
-
-			IEnumerable<ITextualStreamingRecord> GetFooters()
-			{
-				yield break;
-			}
-		}
-
 		protected override ILifecycleEnumerable<ILinedTextualFieldSpec> CoreReadHeaderFields()
 		{
 			return GetHeaders().ToLifecycleEnumerable();
@@ -54,6 +44,13 @@ namespace WellEngineered.Siobhan.Textual.Lined
 
 		private IEnumerable<ITextualStreamingRecord> ResumableParserMainLoop(bool yieldOnlyOnce)
 		{
+			const char EOL_UNIX = '\n';
+			const char EOL_WIN_A = '\r';
+			const char EOL_WIN_B = '\n';
+			
+			const string EOL_UNIX_STR = "\n";
+			const string EOL_WIN_STR = "\r\n";
+			
 			const int EOF = -1;
 			const int DEFAULT_INDEX = -1;
 			string line;
@@ -67,38 +64,39 @@ namespace WellEngineered.Siobhan.Textual.Lined
 
 			StringBuilder recordStringBuilder;
 
+			int buffer;
+			char current, next;
 			char previous = '\0';
+
+			// [value] [newline(\n|\r\n)] | [eof]
 			
 			this.TextualSpec.AssertValid();
 
 			recordStringBuilder = new StringBuilder();
-			
+
 			// main loop - character stream
 			while (!isEndOfFile)
 			{
-				int __value;
-				char current, next;
-				
 				// read the next byte
-				__value = this.BaseTextReader.Read();
-				current = (char)__value;
+				buffer = this.BaseTextReader.Read();
+				current = (char)buffer;
 				
 				// check for -1 (EOF)
-				if (__value == EOF)
+				if (buffer == EOF)
 				{
 					// set terminal state
 					isEndOfFile = true;
 				}
 				
 				// peek the next byte
-				__value = this.BaseTextReader.Peek();
-				next = (char)__value;
+				buffer = this.BaseTextReader.Peek();
+				next = (char)buffer;
 
-				if (this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
+				if ((this.TextualSpec.NewLineStyle == NewLineStyle.Auto && Environment.NewLine == EOL_WIN_STR) ||
 					this.TextualSpec.NewLineStyle == NewLineStyle.Windows)
 				{
 					// check parser state
-					if ((previous == '\r' && current == '\n'))
+					if (previous == EOL_WIN_A && current == EOL_WIN_B)
 					{
 						// eat this
 						continue;
@@ -107,12 +105,12 @@ namespace WellEngineered.Siobhan.Textual.Lined
 
 				// check parser state
 				if (isEndOfFile ||
-					((this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
-						this.TextualSpec.NewLineStyle == NewLineStyle.Unix)
-						&& current == '\n') ||
-					((this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
-						this.TextualSpec.NewLineStyle == NewLineStyle.Windows) &&
-						current == '\r' && next == '\n'))
+					(((this.TextualSpec.NewLineStyle == NewLineStyle.Auto && Environment.NewLine == EOL_UNIX_STR) ||
+					this.TextualSpec.NewLineStyle == NewLineStyle.Unix)
+						&& current == EOL_UNIX) ||
+					(((this.TextualSpec.NewLineStyle == NewLineStyle.Auto && Environment.NewLine == EOL_WIN_STR) ||
+					this.TextualSpec.NewLineStyle == NewLineStyle.Windows) &&
+						current == EOL_WIN_A && next == EOL_WIN_B))
 				{
 					line = recordStringBuilder.ToString();
 
@@ -122,12 +120,12 @@ namespace WellEngineered.Siobhan.Textual.Lined
 						// advance the character index
 						characterIndexStart = characterIndexEnd + 1;
 						characterIndexEnd = characterIndexStart + (line.Length - 1) +
-											((this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
-												this.TextualSpec.NewLineStyle == NewLineStyle.Unix)
-												&& current == '\n' ? 1 : 
-												(this.TextualSpec.NewLineStyle == NewLineStyle.Auto ||
-													this.TextualSpec.NewLineStyle == NewLineStyle.Windows) && 
-													current == '\r' && next == '\n' ? 2 : 0);
+											(((this.TextualSpec.NewLineStyle == NewLineStyle.Auto && Environment.NewLine == EOL_UNIX_STR) ||
+											this.TextualSpec.NewLineStyle == NewLineStyle.Unix)
+												&& current == EOL_UNIX ? 1 : 
+												((this.TextualSpec.NewLineStyle == NewLineStyle.Auto && Environment.NewLine == EOL_WIN_STR) ||
+												this.TextualSpec.NewLineStyle == NewLineStyle.Windows) && 
+													current == EOL_WIN_A && next == EOL_WIN_B ? 2 : 0);
 
 						// advance record index
 						recordIndex++;

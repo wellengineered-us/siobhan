@@ -72,11 +72,6 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 			return value;
 		}
 
-		protected override void CoreWriteFooterRecords(ILifecycleEnumerable<IDelimitedTextualFieldSpec> footers, ILifecycleEnumerable<ITextualStreamingRecord> records)
-		{
-			throw new NotSupportedException(string.Format("Cannot write footer records (via fields) in this version."));
-		}
-
 		protected override void CoreWriteHeaderFields(ILifecycleEnumerable<IDelimitedTextualFieldSpec> headers)
 		{
 			if (this.HeaderRecordWritten)
@@ -96,8 +91,8 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 					fieldIndex++;
 				}
 
-				if (!string.IsNullOrEmpty(this.TextualSpec.RecordDelimiter))
-					this.BaseTextWriter.Write(this.TextualSpec.RecordDelimiter);
+				string newline = !string.IsNullOrEmpty(this.TextualSpec.RecordDelimiter) ? this.TextualSpec.RecordDelimiter : Environment.NewLine;
+				this.BaseTextWriter.Write(newline);
 
 				this.HeaderRecordWritten = true;
 			}
@@ -122,8 +117,8 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 					fieldIndex++;
 				}
 
-				if (!string.IsNullOrEmpty(this.TextualSpec.RecordDelimiter))
-					this.BaseTextWriter.Write(this.TextualSpec.RecordDelimiter);
+				string newline = !string.IsNullOrEmpty(this.TextualSpec.RecordDelimiter) ? this.TextualSpec.RecordDelimiter : Environment.NewLine;
+				this.BaseTextWriter.Write(newline);
 
 				recordIndex++;
 			}
@@ -154,8 +149,9 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 
 		private void WriteField(bool firstFieldInRecord, string fieldValue)
 		{
-			if (!firstFieldInRecord && !string.IsNullOrEmpty(this.TextualSpec.FieldDelimiter))
-				this.BaseTextWriter.Write(this.TextualSpec.FieldDelimiter);
+			string comma = !string.IsNullOrEmpty(this.TextualSpec.FieldDelimiter) ? this.TextualSpec.FieldDelimiter : ",";
+			if (!firstFieldInRecord)
+				this.BaseTextWriter.Write(comma);
 
 			if (!string.IsNullOrEmpty(this.TextualSpec.OpenQuoteValue))
 				this.BaseTextWriter.Write(this.TextualSpec.OpenQuoteValue);

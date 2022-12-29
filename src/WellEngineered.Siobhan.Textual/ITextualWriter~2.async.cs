@@ -22,8 +22,6 @@ namespace WellEngineered.Siobhan.Textual
 
 		ValueTask FlushAsync(CancellationToken cancellationToken = default);
 
-		ValueTask WriteFooterRecordsAsync(IAsyncLifecycleEnumerable<TTextualFieldSpec> specs, IAsyncLifecycleEnumerable<ITextualStreamingRecord> footers, CancellationToken cancellationToken = default);
-
 		ValueTask WriteHeaderFieldsAsync(IAsyncLifecycleEnumerable<TTextualFieldSpec> specs, CancellationToken cancellationToken = default);
 
 		ValueTask WriteRecordsAsync(IAsyncLifecycleEnumerable<ISiobhanPayload> records, CancellationToken cancellationToken = default);

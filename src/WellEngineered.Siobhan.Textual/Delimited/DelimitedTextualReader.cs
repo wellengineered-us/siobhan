@@ -22,31 +22,26 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 		public DelimitedTextualReader(TextReader baseTextReader, IDelimitedTextualSpec delimitedTextualSpec)
 			: base(baseTextReader, delimitedTextualSpec)
 		{
-			this.ResetParserState();
 		}
 
 		#endregion
 
-		#region Fields/Constants
+		private bool isFirstRecord;
 
-		private readonly _ParserState parserState = new _ParserState();
-
-		#endregion
-
-		#region Properties/Indexers/Events
-
-		private _ParserState ParserState
+		public bool IsFirstRecord
 		{
 			get
 			{
-				return this.parserState;
+				return this.isFirstRecord;
+			}
+			set
+			{
+				this.isFirstRecord = value;
 			}
 		}
 
-		#endregion
-
 		#region Methods/Operators
-
+		
 		private static bool LookBehindFixup(StringBuilder targetStringBuilder, string targetValue)
 		{
 			if ((object)targetStringBuilder == null)
@@ -90,63 +85,26 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 
 			return false; // not enough buffer space to care
 		}
-
-		protected override ILifecycleEnumerable<ITextualStreamingRecord> CoreReadFooterRecords(ILifecycleEnumerable<IDelimitedTextualFieldSpec> footers)
-		{
-			return GetFooters().ToLifecycleEnumerable();
-
-			IEnumerable<ITextualStreamingRecord> GetFooters()
-			{
-				foreach (ITextualStreamingRecord textualStreamingRecord in new ITextualStreamingRecord[] { })
-				{
-					yield return textualStreamingRecord;
-				}
-			}
-		}
-
-		protected override ILifecycleEnumerable<IDelimitedTextualFieldSpec> CoreReadHeaderFields()
-		{
-			if (this.ParserState.recordIndex == 0 &&
-				this.TextualSpec.IsFirstRecordHeader)
-			{
-				ITextualStreamingRecord header;
-				IEnumerable<ITextualStreamingRecord> records = this.ResumableParserMainLoop(true);
-
-				header = records.SingleOrDefault(); // force a single enumeration - yield return is a brain fyck
-
-				// sanity check - should never non-null record since it breaks (yieldOnlyOnce==true)
-				if ((object)header != null)
-					throw new InvalidOperationException(string.Format("Delimited text reader parse state failure: yielded header record was not null."));
-
-				this.FixupHeaderRecord();
-			}
-
-			return this.TextualSpec.HeaderSpecs.ToLifecycleEnumerable();
-		}
-
-		protected override ILifecycleEnumerable<ITextualStreamingRecord> CoreReadRecords()
-		{
-			return this.ResumableParserMainLoop(false).ToLifecycleEnumerable();
-		}
-
-		private void FixupHeaderRecord()
+		
+		private static void FixupHeaderRecord(IDelimitedTextualSpec delimitedTextualSpec, ITextualStreamingRecord header)
 		{
 			string[] fieldNames;
 			IDelimitedTextualFieldSpec delimitedTextualFieldSpec;
 
-			fieldNames = this.ParserState.Header.Keys.ToArray();
+			if ((object)delimitedTextualSpec == null)
+				throw new ArgumentNullException(nameof(delimitedTextualSpec));
 
-			if ((object)this.TextualSpec == null ||
-				(object)this.TextualSpec.HeaderSpecs == null ||
-				(object)fieldNames == null)
-				throw new InvalidOperationException(string.Format(""));
-
+			if ((object)header == null)
+				throw new ArgumentNullException(nameof(header));
+			
+			fieldNames = header.Keys.ToArray();
+			
 			// stash parsed field names into field specs member
-			if (fieldNames.Length == this.TextualSpec.HeaderSpecs.Count)
+			if (fieldNames.Length == delimitedTextualSpec.HeaderSpecs.Count)
 			{
 				for (int fieldIndex = 0; fieldIndex < fieldNames.Length; fieldIndex++)
 				{
-					delimitedTextualFieldSpec = this.TextualSpec.HeaderSpecs[fieldIndex];
+					delimitedTextualFieldSpec = delimitedTextualSpec.HeaderSpecs[fieldIndex];
 
 					if (!string.IsNullOrWhiteSpace(delimitedTextualFieldSpec.FieldTitle) &&
 						delimitedTextualFieldSpec.FieldTitle.ToLower() != fieldNames[fieldIndex].ToLower())
@@ -158,7 +116,7 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 			else
 			{
 				// reset field specs because they do not match in length
-				this.TextualSpec.HeaderSpecs.Clear();
+				delimitedTextualSpec.HeaderSpecs.Clear();
 
 				for (long fieldIndex = 0; fieldIndex < fieldNames.Length; fieldIndex++)
 				{
@@ -172,317 +130,237 @@ namespace WellEngineered.Siobhan.Textual.Delimited
 													FieldOrdinal = fieldIndex
 												};
 
-					this.TextualSpec.HeaderSpecs.Add(delimitedTextualFieldSpec);
+					delimitedTextualSpec.HeaderSpecs.Add(delimitedTextualFieldSpec);
 				}
 			}
 		}
 
-		private bool ParserStateMachine()
+		protected override ILifecycleEnumerable<IDelimitedTextualFieldSpec> CoreReadHeaderFields()
 		{
-			bool succeeded;
-			string tempStringValue;
-			bool matchedRecordDelimiter, matchedFieldDelimiter;
-
-			// now determine what to do based on parser state
-			matchedRecordDelimiter = !this.ParserState.isQuotedValue &&
-									!string.IsNullOrEmpty(this.TextualSpec.RecordDelimiter) &&
-									LookBehindFixup(this.ParserState.transientStringBuilder, this.TextualSpec.RecordDelimiter);
-
-			if (!matchedRecordDelimiter)
+			if (this.IsFirstRecord &&
+				this.TextualSpec.IsFirstRecordHeader)
 			{
-				matchedFieldDelimiter = !this.ParserState.isQuotedValue &&
-										!string.IsNullOrEmpty(this.TextualSpec.FieldDelimiter) &&
-										LookBehindFixup(this.ParserState.transientStringBuilder, this.TextualSpec.FieldDelimiter);
-			}
-			else
-				matchedFieldDelimiter = false;
+				ITextualStreamingRecord header;
+				IEnumerable<ITextualStreamingRecord> records = this.ResumableParserMainLoop(true);
 
-			if (matchedRecordDelimiter || matchedFieldDelimiter || this.ParserState.isEOF)
-			{
-				// RECORD_DELIMITER | FIELD_DELIMITER | EOF
+				header = records.SingleOrDefault(); // force a single enumeration - yield return is a brain fyck
 
-				// get string and clear for exit
-				tempStringValue = this.ParserState.transientStringBuilder.ToString();
-				this.ParserState.transientStringBuilder.Clear();
+				// sanity check - should never non-null record since it breaks (yieldOnlyOnce==true)
+				if ((object)header != null)
+					throw new InvalidOperationException(string.Format("Delimited text reader parse state failure: yielded header record was not null."));
 
-				// common logic to store value of field in record
-				if (this.ParserState.isHeaderRecord)
-				{
-					// stash field if FRIS enabled and zeroth record
-					this.ParserState.Record.Add(tempStringValue, this.ParserState.fieldIndex.ToString("0000"));
-				}
-				else
-				{
-					Type fieldType;
-					TextualFieldType textualFieldType;
-					object fieldValue;
-
-					IDelimitedTextualFieldSpec delimitedTextualFieldSpec;
-					IDelimitedTextualFieldSpec[] delimitedTextualFieldSpecs;
-
-					delimitedTextualFieldSpecs = this.TextualSpec.HeaderSpecs.ToArray();
-
-					// check field array and field index validity
-					if ((object)delimitedTextualFieldSpecs == null ||
-						this.ParserState.fieldIndex >= delimitedTextualFieldSpecs.LongLength)
-						throw new InvalidOperationException(string.Format("Delimited text reader parse state failure: field index '{0}' exceeded known field indices '{1}' at character index '{2}'.", this.ParserState.fieldIndex, (object)delimitedTextualFieldSpecs != null ? (delimitedTextualFieldSpecs.Length - 1) : (int?)null, this.ParserState.characterIndex));
-
-					delimitedTextualFieldSpec = delimitedTextualFieldSpecs[this.ParserState.fieldIndex];
-
-					textualFieldType = delimitedTextualFieldSpec.FieldType;
-
-					fieldType = textualFieldType.ToClrType();
-
-					// TODO: add default values, null field value conversions
-					succeeded = true;
-					if (string.IsNullOrWhiteSpace(tempStringValue))
-						fieldValue = fieldType.DefaultValue();
-					else
-						succeeded = tempStringValue.TryParse(fieldType, out fieldValue);
-
-					if (!succeeded)
-						throw new InvalidOperationException(string.Format("Delimited text reader parse state failure: field string value '{0}' could not be parsed into a valid '{1}'.", tempStringValue, fieldType.FullName));
-
-					// lookup field name (key) by index and commit value to record
-					this.ParserState.Record.Add(delimitedTextualFieldSpec.FieldTitle, fieldValue);
-				}
-
-				// handle blank lines (we assume that any RECORDS with valid RECORD delimiter is OK)
-				if (string.IsNullOrEmpty(tempStringValue) &&
-					this.ParserState.Record.Keys.Count == 1)
-					this.ParserState.Record = null;
-
-				// now what to do?
-				if (this.ParserState.isEOF)
-					return true;
-				else if (matchedRecordDelimiter)
-				{
-					// advance record index
-					this.ParserState.recordIndex++;
-
-					// reset field index
-					this.ParserState.fieldIndex = 0;
-
-					// reset value index
-					this.ParserState.valueIndex = 0;
-
-					return true;
-				}
-				else if (matchedFieldDelimiter)
-				{
-					// advance field index
-					this.ParserState.fieldIndex++;
-
-					// reset value index
-					this.ParserState.valueIndex = 0;
-				}
-			}
-			else if (!this.ParserState.isEOF &&
-					!this.ParserState.isQuotedValue &&
-					!string.IsNullOrEmpty(this.TextualSpec.OpenQuoteValue) &&
-					LookBehindFixup(this.ParserState.transientStringBuilder, this.TextualSpec.OpenQuoteValue))
-			{
-				// BEGIN::QUOTE_VALUE
-				this.ParserState.isQuotedValue = true;
-			}
-			//else if (!this.ParserState.isEOF &&
-			//	this.ParserState.isQuotedValue &&
-			//	!string.IsNullOrEmpty(this.TextualSpec.QuoteValue) &&
-			//	LookBehindFixup(this.ParserState.transientStringBuilder, this.TextualSpec.QuoteValue) &&
-			//	this.ParserState.peekNextCharacter.ToString() == this.TextualSpec.QuoteValue)
-			//{
-			//	// unescape::QUOTE_VALUE
-			//	this.ParserState.transientStringBuilder.Append("'");
-			//}
-			else if (!this.ParserState.isEOF &&
-					this.ParserState.isQuotedValue &&
-					!string.IsNullOrEmpty(this.TextualSpec.CloseQuoteValue) &&
-					LookBehindFixup(this.ParserState.transientStringBuilder, this.TextualSpec.CloseQuoteValue))
-			{
-				// END::QUOTE_VALUE
-				this.ParserState.isQuotedValue = false;
-			}
-			else if (!this.ParserState.isEOF)
-			{
-				// {field_data}
-
-				// advance content index
-				this.ParserState.contentIndex++;
-
-				// advance value index
-				this.ParserState.valueIndex++;
-			}
-			else
-			{
-				// {unknown_parser_state_error}
-				throw new InvalidOperationException(string.Format("Unknown parser state error at character index '{0}'.", this.ParserState.characterIndex));
+				FixupHeaderRecord(this.TextualSpec, header);
 			}
 
-			return false;
+			return this.TextualSpec.HeaderSpecs.ToLifecycleEnumerable();
 		}
 
-		private void ResetParserState()
+		protected override ILifecycleEnumerable<ITextualStreamingRecord> CoreReadRecords()
 		{
-			const long DEFAULT_INDEX = 0;
-
-			this.ParserState.Record = new TextualStreamingRecord(0, 0, 0, 0);
-			this.ParserState.transientStringBuilder = new StringBuilder();
-			this.ParserState.readCurrentCharacter = '\0';
-			this.ParserState.peekNextCharacter = '\0';
-			this.ParserState.characterIndex = DEFAULT_INDEX;
-			this.ParserState.contentIndex = DEFAULT_INDEX;
-			this.ParserState.recordIndex = DEFAULT_INDEX;
-			this.ParserState.fieldIndex = DEFAULT_INDEX;
-			this.ParserState.valueIndex = DEFAULT_INDEX;
-			this.ParserState.isQuotedValue = false;
-			this.ParserState.isEOF = false;
-
-			this.TextualSpec.AssertValid();
+			return this.ResumableParserMainLoop(false).ToLifecycleEnumerable();
 		}
 
 		private IEnumerable<ITextualStreamingRecord> ResumableParserMainLoop(bool yieldOnlyOnce)
 		{
-			int __value;
-			char ch;
+			throw new NotImplementedException();
+			/*const int EOF = -1;
+			const int DEFAULT_INDEX = -1;
+			string line;
+			
+			ITextualStreamingRecord record;
+			bool isEndOfFile = false;
+			long recordIndex = DEFAULT_INDEX;
+			long lineIndex = DEFAULT_INDEX;
+			long characterIndexStart = DEFAULT_INDEX;
+			long characterIndexEnd = DEFAULT_INDEX;
 
+			StringBuilder parserStringBuilder;
+
+			char previous = '\0';
+			
+			// (open_quote) [value] (close_quote) [field_delim] ... [record_delim] | [eof]
+
+			bool isHeaderRecord;
+			bool isQuotedValue = false;
+			bool matchedRecordDelimiter;
+			bool matchedFieldDelimiter;
+			
+			this.TextualSpec.AssertValid();
+
+			parserStringBuilder = new StringBuilder();
+			
 			// main loop - character stream
-			while (!this.ParserState.isEOF)
+			while (!isEndOfFile)
 			{
+				int __value;
+				char current, next;
+				
 				// read the next byte
 				__value = this.BaseTextReader.Read();
-				ch = (char)__value;
-
+				current = (char)__value;
+				
 				// check for -1 (EOF)
-				if (__value == -1)
+				if (__value == EOF)
 				{
-					this.ParserState.isEOF = true; // set terminal state
-
+					// set terminal state
+					isEndOfFile = true;
+					
 					// sanity check - should never end with an open quote value
-					if (this.ParserState.isQuotedValue)
-						throw new InvalidOperationException(string.Format("Delimited text reader parse state failure: end of file encountered while reading open quoted value."));
+					if (isQuotedValue)
+						throw new SiobhanException(string.Format("Delimited text reader parse state failure: end of file encountered while reading open quoted value."));
+
+					next = '\0';
 				}
 				else
 				{
+					// peek the next byte
+					__value = this.BaseTextReader.Peek();
+					next = (char)__value;
+					
 					// append character to temp buffer
-					this.ParserState.readCurrentCharacter = ch;
-					this.ParserState.transientStringBuilder.Append(ch);
-
-					// advance character index
-					this.ParserState.characterIndex++;
+					parserStringBuilder.Append(current);
 				}
 
 				// eval on every loop
-				this.ParserState.isHeaderRecord = this.ParserState.recordIndex == 0 && this.TextualSpec.IsFirstRecordHeader;
-				this.ParserState.isFooterRecord = false; //this.ParserState.recordIndex == 0 && (this.TextualSpec.IsLastRecordFooter ?? false);
+				isHeaderRecord = recordIndex == 0 && this.TextualSpec.IsFirstRecordHeader;
+				
+				// check parser state
+				matchedRecordDelimiter = !isQuotedValue &&
+										!string.IsNullOrEmpty(this.TextualSpec.RecordDelimiter) &&
+										LookBehindFixup(parserStringBuilder, this.TextualSpec.RecordDelimiter);
 
-				// peek the next byte
-				__value = this.BaseTextReader.Peek();
-				ch = (char)__value;
-				this.ParserState.peekNextCharacter = ch;
-
-				if (this.ParserStateMachine())
+				if (!matchedRecordDelimiter)
 				{
-					// if record is null here, then is was a blank line - no error just avoid doing work
-					if ((object)this.ParserState.Record != null)
+					matchedFieldDelimiter = !isQuotedValue &&
+											!string.IsNullOrEmpty(this.TextualSpec.FieldDelimiter) &&
+											LookBehindFixup(parserStringBuilder, this.TextualSpec.FieldDelimiter);
+				}
+				else
+					matchedFieldDelimiter = false;
+				
+				if (matchedRecordDelimiter || matchedFieldDelimiter || isEndOfFile)
+				{
+					// RECORD_DELIMITER | FIELD_DELIMITER | EOF
+
+					// get string and clear for exit
+					tempStringValue = this.ParserState.transientStringBuilder.ToString();
+					this.ParserState.transientStringBuilder.Clear();
+
+					// common logic to store value of field in record
+					if (isHeaderRecord)
 					{
-						// should never yield the header record
-						if (!this.ParserState.isHeaderRecord && !this.ParserState.isFooterRecord)
-						{
-							// aint this some shhhhhhhh!t?
-							yield return this.ParserState.Record;
-						}
-						else if (this.ParserState.isHeaderRecord)
-						{
-							this.ParserState.Header = this.ParserState.Record; // cache elsewhere
-							this.ParserState.Record = null; // pretend it was a blank line
-							//this.ParserState.recordIndex--; // adjust down to zero
-						}
-						else if (this.ParserState.isFooterRecord)
-						{
-							this.ParserState.Footer = this.ParserState.Record; // cache elsewhere
-							this.ParserState.Record = null; // pretend it was a blank line
-							//this.ParserState.recordIndex--; // adjust down to zero
-						}
+						// stash field if FRIS enabled and zeroth record
+						this.ParserState.Record.Add(tempStringValue, this.ParserState.fieldIndex.ToString("0000"));
+					}
+					else
+					{
+						Type fieldType;
+						TextualFieldType textualFieldType;
+						object fieldValue;
+
+						IDelimitedTextualFieldSpec delimitedTextualFieldSpec;
+						IDelimitedTextualFieldSpec[] delimitedTextualFieldSpecs;
+
+						delimitedTextualFieldSpecs = this.TextualSpec.HeaderSpecs.ToArray();
+
+						// check field array and field index validity
+						if ((object)delimitedTextualFieldSpecs == null ||
+							this.ParserState.fieldIndex >= delimitedTextualFieldSpecs.LongLength)
+							throw new InvalidOperationException(string.Format("Delimited text reader parse state failure: field index '{0}' exceeded known field indices '{1}' at character index '{2}'.", this.ParserState.fieldIndex, (object)delimitedTextualFieldSpecs != null ? (delimitedTextualFieldSpecs.Length - 1) : (int?)null, this.ParserState.characterIndex));
+
+						delimitedTextualFieldSpec = delimitedTextualFieldSpecs[this.ParserState.fieldIndex];
+
+						textualFieldType = delimitedTextualFieldSpec.FieldType;
+
+						fieldType = textualFieldType.ToClrType();
+
+						// TODO: add default values, null field value conversions
+						succeeded = true;
+						if (string.IsNullOrWhiteSpace(tempStringValue))
+							fieldValue = fieldType.DefaultValue();
+						else
+							succeeded = tempStringValue.TryParse(fieldType, out fieldValue);
+
+						if (!succeeded)
+							throw new InvalidOperationException(string.Format("Delimited text reader parse state failure: field string value '{0}' could not be parsed into a valid '{1}'.", tempStringValue, fieldType.FullName));
+
+						// lookup field name (key) by index and commit value to record
+						this.ParserState.Record.Add(delimitedTextualFieldSpec.FieldTitle, fieldValue);
 					}
 
-					// sanity check - should never get here with zero record index
-					if ( /*!this.ParserState.isHeaderRecord &&*/ this.ParserState.recordIndex == 0)
-						throw new InvalidOperationException(string.Format("Delimited text reader parse state failure: zero record index unexpected."));
+					// handle blank lines (we assume that any RECORDS with valid RECORD delimiter is OK)
+					if (string.IsNullOrEmpty(tempStringValue) &&
+						this.ParserState.Record.Keys.Count == 1)
+						this.ParserState.Record = null;
 
-					// create a new record for the next index; will be used later
-					this.ParserState.Record = new TextualStreamingRecord(this.ParserState.recordIndex, this.ParserState.contentIndex, this.ParserState.characterIndex, -1);
+					// now what to do?
+					if (this.ParserState.isEOF)
+						return true;
+					else if (matchedRecordDelimiter)
+					{
+						// advance record index
+						this.ParserState.recordIndex++;
 
-					if (yieldOnlyOnce) // state-based resumption of loop ;)
-						break; // MUST NOT USE YIELD BREAK - as we will RESUME the enumeration based on state
+						// reset field index
+						this.ParserState.fieldIndex = 0;
+
+						// reset value index
+						this.ParserState.valueIndex = 0;
+
+						return true;
+					}
+					else if (matchedFieldDelimiter)
+					{
+						// advance field index
+						this.ParserState.fieldIndex++;
+
+						// reset value index
+						this.ParserState.valueIndex = 0;
+					}
 				}
-			}
-		}
-
-		#endregion
-
-		#region Classes/Structs/Interfaces/Enums/Delegates
-
-		private sealed class _ParserState
-		{
-			#region Fields/Constants
-
-			public long characterIndex;
-			public long contentIndex;
-			public long fieldIndex;
-			private ITextualStreamingRecord header;
-			public bool isEOF;
-			public bool isFooterRecord;
-			public bool isHeaderRecord;
-			public bool isQuotedValue;
-			public char peekNextCharacter;
-			public char readCurrentCharacter;
-			private ITextualStreamingRecord record;
-			public long recordIndex;
-			public StringBuilder transientStringBuilder;
-			public long valueIndex;
-			private ITextualStreamingRecord footer;
-
-			#endregion
-
-			#region Properties/Indexers/Events
-
-			public ITextualStreamingRecord Header
-			{
-				get
+				else if (!this.ParserState.isEOF &&
+						!this.ParserState.isQuotedValue &&
+						!string.IsNullOrEmpty(this.TextualSpec.OpenQuoteValue) &&
+						LookBehindFixup(this.ParserState.transientStringBuilder, this.TextualSpec.OpenQuoteValue))
 				{
-					return this.header;
+					// BEGIN::QUOTE_VALUE
+					this.ParserState.isQuotedValue = true;
 				}
-				set
+				//else if (!this.ParserState.isEOF &&
+				//	this.ParserState.isQuotedValue &&
+				//	!string.IsNullOrEmpty(this.TextualSpec.QuoteValue) &&
+				//	LookBehindFixup(this.ParserState.transientStringBuilder, this.TextualSpec.QuoteValue) &&
+				//	this.ParserState.peekNextCharacter.ToString() == this.TextualSpec.QuoteValue)
+				//{
+				//	// unescape::QUOTE_VALUE
+				//	this.ParserState.transientStringBuilder.Append("'");
+				//}
+				else if (!this.ParserState.isEOF &&
+						this.ParserState.isQuotedValue &&
+						!string.IsNullOrEmpty(this.TextualSpec.CloseQuoteValue) &&
+						LookBehindFixup(this.ParserState.transientStringBuilder, this.TextualSpec.CloseQuoteValue))
 				{
-					this.header = value;
+					// END::QUOTE_VALUE
+					this.ParserState.isQuotedValue = false;
 				}
-			}
+				else if (!this.ParserState.isEOF)
+				{
+					// {field_data}
 
-			public ITextualStreamingRecord Record
-			{
-				get
-				{
-					return this.record;
-				}
-				set
-				{
-					this.record = value;
-				}
-			}
+					// advance content index
+					this.ParserState.contentIndex++;
 
-			public ITextualStreamingRecord Footer
-			{
-				get
-				{
-					return this.footer;
+					// advance value index
+					this.ParserState.valueIndex++;
 				}
-				set
+				else
 				{
-					this.footer = value;
+					// {unknown_parser_state_error}
+					throw new InvalidOperationException(string.Format("Unknown parser state error at character index '{0}'.", this.ParserState.characterIndex));
 				}
-			}
-
-			#endregion
+				
+				previous = current;
+			}*/
 		}
 
 		#endregion
